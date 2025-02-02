@@ -1,34 +1,24 @@
-import tailwindcss from '@tailwindcss/vite';
+import { PrimeVueResolver } from '@primevue/auto-import-resolver';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import AutoImport from 'unplugin-auto-import/vite';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
-import { NaiveUiResolver } from 'unplugin-vue-components/resolvers';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig, loadEnv } from 'vite';
+
 // https://vitejs.dev/config/
 export default defineConfig(async ({ mode }) => {
     const env = loadEnv(mode, process.cwd()); // 获取.env文件里定义的环境变量
     const host = env.TAURI_DEV_HOST;
+    const devTool = env.VITE_DEVTOOLS;
     return {
         plugins: [
             vue(),
-            Icons(),
-            tailwindcss(),
+            Icons({ compiler: 'vue3' }),
             AutoImport({
                 dts: 'src/auto-imports.d.ts',
-                imports: [
-                    'vue',
-                    {
-                        'naive-ui': [
-                            'useDialog',
-                            'useMessage',
-                            'useNotification',
-                            'useLoadingBar',
-                        ],
-                    },
-                ],
+                imports: ['vue', 'vue-i18n', 'vue-router'],
             }),
             Components({
                 // 指定组件位置，默认是src/components
@@ -37,8 +27,11 @@ export default defineConfig(async ({ mode }) => {
                 // 配置文件生成位置
                 dts: 'src/components.d.ts',
                 // ui库解析器
-                resolvers: [NaiveUiResolver(), IconsResolver()],
+                resolvers: [PrimeVueResolver(), IconsResolver()],
             }),
+            devTool === 'true'
+                ? import('vite-plugin-vue-devtools').then((i) => i.default())
+                : undefined,
         ],
         resolve: {
             alias: {

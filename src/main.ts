@@ -1,5 +1,7 @@
-import '@/styles/tailwind/index.css';
+import '@/assets/tailwind.css';
+import '@/styles/index.css';
 import { createPinia } from 'pinia';
+import PrimeVue, { type PrimeVueConfiguration } from 'primevue/config';
 import { createPlugin } from 'tauri-plugin-pinia';
 import { createApp } from 'vue';
 import App from './App.vue';
@@ -11,10 +13,8 @@ import { usePreferenceStore } from './store/preference';
 async function init() {
     // 创建
     const app = createApp(App);
-
     const pinia = createPinia();
     pinia.use(createPlugin());
-    app.use(router);
     app.use(pinia);
     // 初始化存储
     await setupStore();
@@ -24,6 +24,11 @@ async function init() {
         locale: preferenceStore.preference.locale,
     });
     app.use(i18n);
+
+    app.use(PrimeVue, {
+        theme: 'none',
+    } as PrimeVueConfiguration);
+    app.use(router);
     app.mount('#app');
 }
 

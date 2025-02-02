@@ -23,43 +23,33 @@ async function maximize() {
     }
 }
 </script>
-
 <template>
     <div
-        class="bg-opacity-40 text-primary-foreground flex h-6 w-full content-center justify-end bg-slate-200 dark:bg-slate-900"
+        class="text-primary-foreground flex h-full w-full content-center justify-end bg-surface-800"
         data-tauri-drag-region
     >
-        <n-button
-            class="!h-6 !w-10 rounded-none hover:!bg-slate-200 dark:hover:!bg-slate-800"
+        <Button
+            class="h-full w-10 !rounded-none !text-surface-200"
             v-if="props.resizable"
-            variant="ghost"
             @click="minimize"
-            quaternary
+            variant="text"
         >
-            <i-fluent-minimize-16-regular
-                class="text-slate-300 dark:text-slate-400"
-            />
-        </n-button>
-        <n-button
-            class="!h-6 !w-10 !rounded-none hover:!bg-slate-200 dark:hover:!bg-slate-800"
+            <i-fluent-minimize-16-regular />
+        </Button>
+        <Button
+            class="h-full w-10 !rounded-none !text-surface-200"
             v-if="props.resizable"
-            variant="ghost"
             @click="maximize"
-            quaternary
+            variant="text"
         >
-            <i-fluent-maximize-16-regular
-                class="text-slate-300 dark:text-slate-400"
-            />
-        </n-button>
-        <n-button
-            class="!h-6 !w-10 !rounded-none rounded-tr-lg hover:!bg-red-500"
-            variant="ghost"
+            <i-fluent-maximize-16-regular />
+        </Button>
+        <Button
+            class="h-full w-10 !rounded-none rounded-tr-lg !text-surface-200 hover:!bg-[#e81123]"
             @click="close"
-            quaternary
+            variant="text"
         >
-            <i-fluent-dismiss-16-regular
-                class="text-slate-300 hover:text-slate-100 dark:text-slate-400 dark:hover:text-slate-100"
-            />
-        </n-button>
+            <i-fluent-dismiss-16-regular />
+        </Button>
     </div>
 </template>

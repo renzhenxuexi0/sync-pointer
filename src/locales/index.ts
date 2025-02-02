@@ -9,7 +9,6 @@ export function setupI18n(options = { locale: 'zh-CN' }) {
         locale: options.locale,
     }) as I18n;
     setI18nLanguage(i18n, options.locale as locale);
-    loadLocaleMessages(i18n, options.locale as locale, 'default');
     return i18n;
 }
 
@@ -32,6 +31,7 @@ export function setI18nLanguage(i18n: I18n, locale: locale) {
      * axios.defaults.headers.common['Accept-Language'] = locale
      */
     document.querySelector('html')?.setAttribute('lang', locale);
+    loadLocaleMessages(i18n, locale, 'default');
 }
 
 export async function loadLocaleMessages(
@@ -40,10 +40,14 @@ export async function loadLocaleMessages(
     name: 'default' | 'home' | 'setting',
 ) {
     // load locale messages with dynamic import
-    const messages = await import(`./langs/${locale}/${name}.json`);
-
-    // set locale and locale message
-    i18n.global.setLocaleMessage(locale, messages.default);
+    const allMessages: Record<string, string> = {};
+    const messages = await import(`@/locales/${locale}/${name}.json`);
+    allMessages[name] = messages.default;
+    if (name !== 'default') {
+        i18n.global.mergeLocaleMessage(locale, allMessages);
+    } else {
+        i18n.global.setLocaleMessage(locale, allMessages);
+    }
 
     return nextTick();
 }

@@ -7,13 +7,19 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Avatar: typeof import('primevue/avatar')['default']
+    Button: typeof import('primevue/button')['default']
     IFluentDismiss16Regular: typeof import('~icons/fluent/dismiss16-regular')['default']
+    IFluentHome24Regular: typeof import('~icons/fluent/home24-regular')['default']
     IFluentMaximize16Regular: typeof import('~icons/fluent/maximize16-regular')['default']
     IFluentMinimize16Regular: typeof import('~icons/fluent/minimize16-regular')['default']
-    NButton: typeof import('naive-ui')['NButton']
-    NConfigProvider: typeof import('naive-ui')['NConfigProvider']
+    Menu: typeof import('primevue/menu')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SiderBar: typeof import('./components/sider-bar/index.vue')['default']
     TitleBar: typeof import('./components/title-bar/index.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    Ripple: typeof import('primevue/ripple')['default']
   }
 }

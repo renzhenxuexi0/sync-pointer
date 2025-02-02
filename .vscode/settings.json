@@ -175,11 +175,7 @@
         "yaml": false
     },
     "cssVariables.lookupFiles": ["packages/core/base/design/src/**/*.css"],
-    "i18n-ally.localesPaths": [
-        "packages/locales/src/langs",
-        "playground/src/locales/langs",
-        "apps/*/src/locales/langs"
-    ],
+    "i18n-ally.localesPaths": ["src/locales"],
     "i18n-ally.pathMatcher": "{locale}/{namespace}.{ext}",
     "i18n-ally.enabledParsers": ["json"],
     "i18n-ally.sourceLanguage": "en",
@@ -208,13 +204,29 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "cSpell.words": [
+        "bezier",
+        "buttonbar",
+        "contextmenu",
+        "datatable",
+        "dragpoint",
         "Fira",
+        "gridlines",
+        "hoverable",
+        "inputtext",
         "Lato",
         "nonwords",
+        "nowrap",
         "pinia",
+        "primeui",
+        "primevue",
+        "reorderable",
+        "resizer",
+        "rgba",
         "tauri",
+        "treetable",
         "unplugin",
-        "vfonts"
+        "vfonts",
+        "virtualscroller"
     ],
     "prettier.enable": true,
     "editor.formatOnSave": true
