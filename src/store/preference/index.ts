@@ -15,10 +15,6 @@ export const usePreferenceStore = defineStore(
             theme: 'light',
         } as Preference);
 
-        const getPreferenceTheme = computed(
-            () => preference.value.theme || 'system',
-        );
-
         const setPreferenceLocale = (locale: 'en-US' | 'zh-CN') => {
             preference.value.locale = locale;
             setI18nLanguage(locale);
@@ -33,7 +29,6 @@ export const usePreferenceStore = defineStore(
 
         return {
             preference,
-            getPreferenceTheme,
             setPreferenceLocale,
             setPreferenceTheme,
         };

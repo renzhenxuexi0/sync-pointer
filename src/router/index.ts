@@ -7,14 +7,17 @@ import {
 
 const routes: RouteRecordRaw[] = [
     {
-        name: 'home',
-        path: '/',
-        component: () => import('@/views/home/index.vue'),
-    },
-    {
         name: 'setting',
-        path: '/setting',
+        path: '/',
         component: () => import('@/views/setting/index.vue'),
+        children: [
+            {
+                name: 'screen-layout',
+                path: '/screen-layout',
+                component: () =>
+                    import('@/views/setting/screen-layout/index.vue'),
+            },
+        ],
     },
 ];
 
@@ -25,7 +28,7 @@ const router = createRouter({
 
 // 配置路由守卫懒加载本地化配置
 router.beforeEach(async (to, _from, next) => {
-    await loadLocaleMessages(to.name as 'home' | 'setting');
+    await loadLocaleMessages(to.name as string);
     next();
 });
 

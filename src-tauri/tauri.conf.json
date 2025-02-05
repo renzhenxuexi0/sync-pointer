@@ -13,10 +13,8 @@
         "windows": [
             {
                 "title": "Sync Pointer",
-                "width": 566,
-                "height": 666,
-                "decorations": false,
-                "transparent": true
+                "width": 600,
+                "height": 800
             }
         ],
         "security": {

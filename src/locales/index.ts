@@ -1,4 +1,4 @@
-import { info } from '@tauri-apps/plugin-log';
+import { error, info } from '@tauri-apps/plugin-log';
 import { createI18n } from 'vue-i18n';
 import enUS from './en-US/default.json';
 import zhCN from './zh-CN/default.json';
@@ -29,19 +29,27 @@ export function setI18nLanguage(locale: locale) {
     info(`已设置语言为 ${locale}`);
 }
 
-export async function loadLocaleMessages(name: 'home' | 'setting') {
+export async function loadLocaleMessages(name: string | undefined) {
     // 懒加载语言包
-    const zhCNMessage = await import(`@/locales/zh-CN/${name}.json`);
-    const enUSMessage = await import(`@/locales/en-US/${name}.json`);
+    try {
+        if (!name) {
+            return;
+        }
+        const zhCNMessage = await import(`@/locales/zh-CN/${name}.json`);
+        const enUSMessage = await import(`@/locales/en-US/${name}.json`);
 
-    const allMessages = {
-        'zh-CN': zhCNMessage.default,
-        'en-US': enUSMessage.default,
-    };
+        const allMessages = {
+            'zh-CN': zhCNMessage.default,
+            'en-US': enUSMessage.default,
+        };
 
-    for (const [locale, messages] of Object.entries(allMessages)) {
-        i18n.global.mergeLocaleMessage(locale, { [name]: messages });
+        for (const [locale, messages] of Object.entries(allMessages)) {
+            i18n.global.mergeLocaleMessage(locale, { [name]: messages });
+        }
+        info(`已加载 ${name} 的语言包`);
+    } catch (e) {
+        error(`加载 ${name} 的语言包失败 error: ${JSON.stringify(e)}`);
     }
-    info(`已加载 ${name} 的语言包`);
+
     return nextTick();
 }

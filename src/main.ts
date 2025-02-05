@@ -1,10 +1,9 @@
+import ElementPlus from 'element-plus';
+import 'element-plus/dist/index.css';
 import { createPinia } from 'pinia';
 import { createPlugin } from 'tauri-plugin-pinia';
 import { createApp } from 'vue';
-import { createVuetify } from 'vuetify';
-import 'vuetify/styles';
 import App from './App.vue';
-import { aliases, custom } from './iconsets/custom';
 import { i18n, setI18nLanguage } from './locales';
 import router from './router';
 import { setupStore } from './store';
@@ -16,6 +15,7 @@ async function init() {
     const app = createApp(App);
     const pinia = createPinia();
     pinia.use(createPlugin());
+    app.use(ElementPlus);
     app.use(pinia);
     // 初始化存储
     await setupStore();
@@ -23,17 +23,8 @@ async function init() {
     // 设置语言
     setI18nLanguage(preferenceStore.preference.locale);
     await preferenceStore.setPreferenceTheme(preferenceStore.preference.theme);
+
     app.use(i18n);
-    const vuetify = createVuetify({
-        icons: {
-            defaultSet: 'custom',
-            aliases,
-            sets: {
-                custom,
-            },
-        },
-    });
-    app.use(vuetify);
     app.use(router);
     app.mount('#app');
 }

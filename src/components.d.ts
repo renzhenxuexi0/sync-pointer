@@ -7,13 +7,21 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    IFluentDismiss16Regular: typeof import('~icons/fluent/dismiss16-regular')['default']
-    IFluentHome24Regular: typeof import('~icons/fluent/home24-regular')['default']
-    IFluentMaximize16Regular: typeof import('~icons/fluent/maximize16-regular')['default']
-    IFluentMinimize16Regular: typeof import('~icons/fluent/minimize16-regular')['default']
+    ElAside: typeof import('element-plus/es')['ElAside']
+    ElButton: typeof import('element-plus/es')['ElButton']
+    ElContainer: typeof import('element-plus/es')['ElContainer']
+    ElIcon: typeof import('element-plus/es')['ElIcon']
+    ElMain: typeof import('element-plus/es')['ElMain']
+    ElMenu: typeof import('element-plus/es')['ElMenu']
+    ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
+    ElRadioButton: typeof import('element-plus/es')['ElRadioButton']
+    ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
+    ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
+    'IFluentArrow-Right20Filled': typeof import('~icons/fluent/arrow--right20-filled')['default']
+    IFluentArrowCircleRight20Filled: typeof import('~icons/fluent/arrow-circle-right20-filled')['default']
+    IFluentArrowRight20Filled: typeof import('~icons/fluent/arrow-right20-filled')['default']
+    IFluentLayoutRowTwoFocusTopSettings20Filled: typeof import('~icons/fluent/layout-row-two-focus-top-settings20-filled')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    SelectButton: typeof import('primevue/selectbutton')['default']
-    TitleBar: typeof import('./components/title-bar/index.vue')['default']
   }
 }
