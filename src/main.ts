@@ -1,15 +1,15 @@
-import '@/assets/tailwind.css';
-import '@/styles/index.css';
 import { createPinia } from 'pinia';
-import PrimeVue, { type PrimeVueConfiguration } from 'primevue/config';
 import { createPlugin } from 'tauri-plugin-pinia';
 import { createApp } from 'vue';
+import { createVuetify } from 'vuetify';
+import 'vuetify/styles';
 import App from './App.vue';
+import { aliases, custom } from './iconsets/custom';
 import { i18n, setI18nLanguage } from './locales';
 import router from './router';
 import { setupStore } from './store';
 import { usePreferenceStore } from './store/preference';
-import { setTheme } from '@tauri-apps/api/app';
+import './styles/index.css';
 
 async function init() {
     // 创建
@@ -22,11 +22,18 @@ async function init() {
     const preferenceStore = usePreferenceStore();
     // 设置语言
     setI18nLanguage(preferenceStore.preference.locale);
-    setTheme(preferenceStore.preference.theme);
+    await preferenceStore.setPreferenceTheme(preferenceStore.preference.theme);
     app.use(i18n);
-    app.use(PrimeVue, {
-        theme: 'none',
-    } as PrimeVueConfiguration);
+    const vuetify = createVuetify({
+        icons: {
+            defaultSet: 'custom',
+            aliases,
+            sets: {
+                custom,
+            },
+        },
+    });
+    app.use(vuetify);
     app.use(router);
     app.mount('#app');
 }

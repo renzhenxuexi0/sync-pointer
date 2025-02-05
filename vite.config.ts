@@ -1,4 +1,4 @@
-import { PrimeVueResolver } from '@primevue/auto-import-resolver';
+import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import AutoImport from 'unplugin-auto-import/vite';
@@ -6,6 +6,7 @@ import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig, loadEnv } from 'vite';
+import vuetify from 'vite-plugin-vuetify';
 
 // https://vitejs.dev/config/
 export default defineConfig(async ({ mode }) => {
@@ -15,7 +16,11 @@ export default defineConfig(async ({ mode }) => {
     return {
         plugins: [
             vue(),
-            Icons({ compiler: 'vue3' }),
+            vuetify({ autoImport: { labs: true } }),
+            tailwindcss(),
+            Icons({
+                compiler: 'vue3',
+            }),
             AutoImport({
                 dts: 'src/auto-imports.d.ts',
                 imports: ['vue', 'vue-i18n', 'vue-router'],
@@ -27,7 +32,7 @@ export default defineConfig(async ({ mode }) => {
                 // 配置文件生成位置
                 dts: 'src/components.d.ts',
                 // ui库解析器
-                resolvers: [PrimeVueResolver(), IconsResolver()],
+                resolvers: [IconsResolver()],
             }),
             devTool === 'true'
                 ? import('vite-plugin-vue-devtools').then((i) => i.default())

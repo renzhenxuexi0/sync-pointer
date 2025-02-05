@@ -1,39 +1,10 @@
 <script setup lang="ts">
-import logo from '@/assets/logo.png';
-import { MenuItem } from 'primevue/menuitem';
-import { FunctionalComponent } from 'vue';
-import FluentHome24Regular from '~icons/fluent/home-24-regular';
 import FluentSettings16Filled from '~icons/fluent/settings-16-filled';
-import FluentSettings24Regular from '~icons/fluent/settings-24-regular';
 import FluentWeatherMoon16Filled from '~icons/fluent/weather-moon-16-filled';
 import FluentWeatherSunny16Filled from '~icons/fluent/weather-sunny-16-filled';
-import { usePreferenceStore } from './store/preference';
+// import { usePreferenceStore } from './store/preference';
 
 const { t } = useI18n();
-
-const items = ref<
-    (MenuItem & {
-        routerName?: string;
-        i?: FunctionalComponent;
-    })[]
->([
-    {
-        separator: true,
-    },
-    {
-        label: () => t('default.home-title'),
-        routerName: 'home',
-        i: FluentHome24Regular as FunctionalComponent,
-    },
-    {
-        label: () => t('default.setting-title'),
-        routerName: 'setting',
-        i: FluentSettings24Regular as FunctionalComponent,
-    },
-    {
-        separator: true,
-    },
-]);
 
 const themeOptions = reactive([
     {
@@ -52,85 +23,31 @@ const themeOptions = reactive([
         value: 'dark',
     },
 ]);
-const { setPreferenceTheme, getPreferenceTheme } = usePreferenceStore();
+// const { setPreferenceTheme, getPreferenceTheme } = usePreferenceStore();
 </script>
 
 <template>
-    <div class="flex h-screen w-screen flex-col">
-        <title-bar
-            :resizable="true"
-            class="max-h-[5%]"
-        />
-        <div class="flex h-[95%] w-full">
-            <Menu
-                :model="items"
-                :pt="{
-                    root: '!rounded-none',
-                    start: 'h-1/8',
-                    end: 'h-1/8',
-                    list: 'h-3/4',
-                }"
-                auto-z-index
-                class="h-full"
-            >
-                <template #start>
-                    <div class="mb-1 flex w-full items-center justify-center">
-                        <Avatar
-                            :image="logo"
-                            size="xlarge"
-                        />
-                    </div>
-                </template>
-                <template #item="{ item, props }">
-                    <router-link
-                        :to="{ name: item.routerName }"
-                        v-slot="{ href, navigate }"
-                        class="flex w-full items-center"
-                        custom
+    <v-layout>
+        <title-bar :resizable="true" />
+        <!-- <SelectButton
+                        :model-value="getPreferenceTheme"
+                        @change="
+                            (event) => {
+                                setPreferenceTheme(event.value);
+                            }
+                        "
+                        :options="themeOptions"
+                        option-label="label"
+                        option-value="value"
                     >
-                        <a
-                            v-ripple
-                            :href="href"
-                            v-bind="props.action"
-                            @click="navigate"
-                        >
+                        <template #option="slotProps">
                             <component
-                                :is="item.i"
+                                :is="slotProps.option.i"
+                                v-tooltip="slotProps.option.label()"
                                 class="size-5"
                             />
-                            <span class="ml-2">{{
-                                typeof item.label === 'function'
-                                    ? item.label()
-                                    : item.label
-                            }}</span>
-                        </a>
-                    </router-link>
-                </template>
-                <template #end>
-                    <div class="flex w-full items-center justify-center">
-                        <SelectButton
-                            :model-value="getPreferenceTheme"
-                            @change="
-                                (event) => {
-                                    setPreferenceTheme(event.value);
-                                }
-                            "
-                            :options="themeOptions"
-                            option-label="label"
-                            option-value="value"
-                        >
-                            <template #option="slotProps">
-                                <component
-                                    :is="slotProps.option.i"
-                                    v-tooltip="slotProps.option.label()"
-                                    class="size-5"
-                                />
-                            </template>
-                        </SelectButton>
-                    </div>
-                </template>
-            </Menu>
-            <router-view class="h-full w-full" />
-        </div>
-    </div>
+                        </template>
+                    </SelectButton> -->
+        <router-view class="h-full w-[95%]" />
+    </v-layout>
 </template>
