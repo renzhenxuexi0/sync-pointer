@@ -112,15 +112,7 @@ const { setPreferenceTheme, getPreferenceTheme } = usePreferenceStore();
                             :model-value="getPreferenceTheme"
                             @change="
                                 (event) => {
-                                    const theme = event.value as
-                                        | 'light'
-                                        | 'system'
-                                        | 'dark';
-                                    if (theme === 'system') {
-                                        setPreferenceTheme(undefined);
-                                    } else {
-                                        setPreferenceTheme(theme);
-                                    }
+                                    setPreferenceTheme(event.value);
                                 }
                             "
                             :options="themeOptions"

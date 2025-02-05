@@ -4,7 +4,7 @@ import { defineStore } from 'pinia';
 
 export interface Preference {
     locale: 'en-US' | 'zh-CN';
-    theme: 'light' | 'dark' | undefined;
+    theme: 'light' | 'dark' | 'system';
 }
 
 export const usePreferenceStore = defineStore(
@@ -25,10 +25,10 @@ export const usePreferenceStore = defineStore(
         };
 
         const setPreferenceTheme = async (
-            theme: 'light' | 'dark' | undefined,
+            theme: 'light' | 'dark' | 'system',
         ) => {
             preference.value.theme = theme;
-            await setTheme(theme);
+            await setTheme(theme === 'system' ? undefined : theme);
         };
 
         return {
