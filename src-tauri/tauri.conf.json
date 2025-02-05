@@ -12,15 +12,15 @@
     "app": {
         "windows": [
             {
-                "title": "sync-pointer",
-                "width": 800,
-                "height": 600,
+                "title": "Sync Pointer",
+                "width": 566,
+                "height": 666,
                 "decorations": false,
                 "transparent": true
             }
         ],
         "security": {
-            "capabilities": ["default", "pinia"],
+            "capabilities": ["core", "log", "pinia"],
             "csp": null
         }
     },

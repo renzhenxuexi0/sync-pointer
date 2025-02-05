@@ -3,5 +3,5 @@
     "identifier": "pinia",
     "description": "Pinia Capability",
     "windows": ["*"],
-    "permissions": ["pinia:default", "core:event:default"]
+    "permissions": ["pinia:default"]
 }

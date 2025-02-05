@@ -1,3 +1,4 @@
+import { loadLocaleMessages } from '@/locales';
 import {
     createRouter,
     createWebHistory,
@@ -20,6 +21,12 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
     history: createWebHistory(),
     routes,
+});
+
+// 配置路由守卫懒加载本地化配置
+router.beforeEach(async (to, _from, next) => {
+    await loadLocaleMessages(to.name as 'home' | 'setting');
+    next();
 });
 
 export default router;

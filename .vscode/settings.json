@@ -229,5 +229,8 @@
         "virtualscroller"
     ],
     "prettier.enable": true,
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "cSpell.enabledSchemes": {
+        "file": false
+    }
 }

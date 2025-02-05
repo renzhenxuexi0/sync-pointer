@@ -1,53 +1,47 @@
-import { createI18n, type I18n } from 'vue-i18n';
+import { info } from '@tauri-apps/plugin-log';
+import { createI18n } from 'vue-i18n';
+import enUS from './en-US/default.json';
+import zhCN from './zh-CN/default.json';
 
 export type locale = 'en-US' | 'zh-CN';
 export const SUPPORT_LOCALES = ['en-US', 'zh-CN'];
 
-export function setupI18n(options = { locale: 'zh-CN' }) {
-    const i18n = createI18n({
-        legacy: false,
-        locale: options.locale,
-    }) as I18n;
-    setI18nLanguage(i18n, options.locale as locale);
-    return i18n;
-}
+export const i18n = createI18n({
+    legacy: false,
+    locale: 'zh-CN',
+    messages: {
+        'zh-CN': {
+            default: zhCN,
+        },
+        'en-US': {
+            default: enUS,
+        },
+    },
+});
 
 /**
  * 设置语言
- * @param i18n i18n 实例
  * @param locale 语言
  */
-export function setI18nLanguage(i18n: I18n, locale: locale) {
-    if (i18n.global.locale instanceof String) {
-        i18n.global.locale = locale;
-    } else if (i18n.global.locale instanceof Object) {
-        i18n.global.locale.value = locale;
-    }
-    /**
-     * 注意：
-     * 如果需要为请求头指定语言设置，例如 `fetch` API，请在此处设置。
-     * 以下是 axios 的示例。
-     *
-     * axios.defaults.headers.common['Accept-Language'] = locale
-     */
+export function setI18nLanguage(locale: locale) {
+    i18n.global.locale.value = locale;
     document.querySelector('html')?.setAttribute('lang', locale);
-    loadLocaleMessages(i18n, locale, 'default');
+    info(`已设置语言为 ${locale}`);
 }
 
-export async function loadLocaleMessages(
-    i18n: I18n,
-    locale: locale,
-    name: 'default' | 'home' | 'setting',
-) {
-    // load locale messages with dynamic import
-    const allMessages: Record<string, string> = {};
-    const messages = await import(`@/locales/${locale}/${name}.json`);
-    allMessages[name] = messages.default;
-    if (name !== 'default') {
-        i18n.global.mergeLocaleMessage(locale, allMessages);
-    } else {
-        i18n.global.setLocaleMessage(locale, allMessages);
-    }
+export async function loadLocaleMessages(name: 'home' | 'setting') {
+    // 懒加载语言包
+    const zhCNMessage = await import(`@/locales/zh-CN/${name}.json`);
+    const enUSMessage = await import(`@/locales/en-US/${name}.json`);
 
+    const allMessages = {
+        'zh-CN': zhCNMessage.default,
+        'en-US': enUSMessage.default,
+    };
+
+    for (const [locale, messages] of Object.entries(allMessages)) {
+        i18n.global.mergeLocaleMessage(locale, { [name]: messages });
+    }
+    info(`已加载 ${name} 的语言包`);
     return nextTick();
 }
