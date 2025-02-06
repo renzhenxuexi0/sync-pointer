@@ -1,4 +1,4 @@
-export default {
+const config = {
     endOfLine: 'auto',
     printWidth: 80,
     tabWidth: 4,
@@ -23,3 +23,5 @@ export default {
     plugins: ['prettier-plugin-tailwindcss'],
     proseWrap: 'never',
 };
+
+export default config;

@@ -1,16 +1,45 @@
-# Tauri + Vue + TypeScript
+# 共享键鼠软件
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+该项目是一个使用 Next.js 和 Tauri 构建的共享键鼠软件。它允许用户在多台设备之间共享键盘和鼠标，提高工作效率。
 
-## Recommended IDE Setup
+## 技术栈
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- **Next.js**: 一个用于构建现代 Web 应用的 React 框架。
+- **Tauri**: 一个用于构建小巧、快速、安全的桌面应用的框架。
 
-## Type Support For `.vue` Imports in TS
+## 功能
 
-Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates. However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can enable Volar's Take Over mode by following these steps:
+- 在多台设备之间无缝切换键盘和鼠标。
+- 支持多种操作系统，包括 Windows、macOS 和 Linux。
+- 简单易用的用户界面。
 
-1. Run `Extensions: Show Built-in Extensions` from VS Code's command palette, look for `TypeScript and JavaScript Language Features`, then right click and select `Disable (Workspace)`. By default, Take Over mode will enable itself if the default TypeScript extension is disabled.
-2. Reload the VS Code window by running `Developer: Reload Window` from the command palette.
+## 安装与使用
 
-You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/volar/discussions/471).
+1. 克隆仓库：
+    ```bash
+    git clone https://github.com/your-repo/sync-pointer.git
+    cd sync-pointer
+    ```
+
+2. 安装依赖：
+    ```bash
+    bun i
+    ```
+
+3. 运行开发服务器：
+    ```bash
+    bun run dev
+    ```
+
+4. 构建桌面应用：
+    ```bash
+    bun run tauri build
+    ```
+
+## 贡献
+
+欢迎贡献代码！请提交 Pull Request 或报告问题。
+
+## 许可证
+
+该项目使用 MIT 许可证。

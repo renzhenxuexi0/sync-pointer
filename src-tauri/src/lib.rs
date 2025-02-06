@@ -21,7 +21,6 @@ pub fn run() {
                 ])
                 .build(),
         )
-        .plugin(tauri_plugin_pinia::init())
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
