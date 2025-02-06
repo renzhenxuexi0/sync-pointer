@@ -1,0 +1,8 @@
+{
+    "i18n-ally.dirStructure": "dir",
+    "i18n-ally.localesPaths": ["app/locales", "app/plugins/i18n"],
+    "i18n-ally.displayLanguage": "zh-CN",
+    "i18n-ally.enabledFrameworks": ["vscode", "react"],
+    "i18n-ally.extract.keygenStyle": "kebab-case",
+    "i18n-ally.fullReloadOnChanged": true
+}

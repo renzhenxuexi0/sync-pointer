@@ -18,7 +18,7 @@
             }
         ],
         "security": {
-            "capabilities": ["core", "log"],
+            "capabilities": ["core", "log", "valtio"],
             "csp": null
         }
     },
