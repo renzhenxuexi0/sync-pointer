@@ -1,12 +1,7 @@
 {
-    "$schema": "../gen/schemas/desktop-schema.json",
-    "identifier": "valtio",
-    "description": "Valtio Capability",
-    "windows": [
-        "*"
-    ],
-    "permissions": [
-        "valtio:default",
-        "core:event:default"
-    ]
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "description": "valtio Capability",
+  "identifier": "valtio",
+  "windows": ["*"],
+  "permissions": ["valtio:default", "core:event:default"]
 }

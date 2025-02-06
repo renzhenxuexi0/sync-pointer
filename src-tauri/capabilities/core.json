@@ -1,18 +1,7 @@
 {
-    "$schema": "../gen/schemas/desktop-schema.json",
-    "identifier": "core",
-    "description": "Core Capability",
-    "windows": ["*"],
-    "permissions": [
-        "core:default",
-        "core:event:default",
-        "core:app:allow-set-app-theme",
-        "core:window:allow-close",
-        "core:window:allow-minimize",
-        "core:window:allow-unminimize",
-        "core:window:allow-maximize",
-        "core:window:allow-unmaximize",
-        "core:window:allow-start-dragging",
-        "core:window:allow-start-resize-dragging"
-    ]
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "core",
+  "description": "Core Capability",
+  "windows": ["*"],
+  "permissions": ["core:default", "core:app:allow-set-app-theme"]
 }

@@ -1,12 +1,9 @@
-use tauri::Runtime;
 use tauri_plugin_log::{Target, TargetKind};
 
+// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
-async fn greet<R: Runtime>(
-    _app: tauri::AppHandle<R>,
-    _window: tauri::Window<R>,
-) -> Result<String, String> {
-    Ok("Hello from Rust!".to_string())
+fn greet(name: &str) -> String {
+    format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
