@@ -1,4 +1,8 @@
-use tauri::Runtime;
+pub mod client;
+pub mod config;
+pub mod server;
+
+use tauri::{Manager, Runtime};
 use tauri_plugin_log::{Target, TargetKind};
 
 #[tauri::command]
@@ -12,6 +16,15 @@ async fn greet<R: Runtime>(
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .setup(move |app| {
+            let path = app
+                .path()
+                .app_log_dir()?;
+            config::tracing_config::init(&path)?;
+            log::info!("log path: {:?}", path);
+            tracing::info!("tracing log path: {:?}", path);
+            Ok(())
+        })
         .plugin(
             tauri_plugin_log::Builder::new()
                 .targets([

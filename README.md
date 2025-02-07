@@ -13,6 +13,13 @@
 - 支持多种操作系统，包括 Windows、macOS 和 Linux。
 - 简单易用的用户界面。
 
+## 日志路径
+日志文件位置因操作系统而异：
+
+- Linux: `${configDir}/${bundleIdentifier}/logs`
+- macOS: `${homeDir}/Library/Logs/{bundleIdentifier}`
+- Windows: `${configDir}/${bundleIdentifier}/logs`
+
 ## 安装与使用
 
 1. 克隆仓库：
