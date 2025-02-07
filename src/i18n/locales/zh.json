@@ -10,5 +10,13 @@
     "maximize": "最大化",
     "restore": "还原",
     "close": "关闭"
+  },
+  "menu": {
+    "dashboard": "仪表盘",
+    "settings": "设置"
+  },
+  "settings": {
+    "language": "切换语言",
+    "theme": "切换主题"
   }
 }

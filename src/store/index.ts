@@ -1,3 +1,5 @@
 import { preferenceStore } from './preference';
 
-await preferenceStore.start();
+export async function initStore() {
+  await preferenceStore.start();
+}

@@ -19,7 +19,7 @@
     ],
     "security": {
       "csp": null,
-      "capabilities": ["core", "valtio"]
+      "capabilities": ["core", "valtio", "log"]
     }
   },
   "bundle": {

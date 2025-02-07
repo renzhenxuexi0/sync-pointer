@@ -10,5 +10,13 @@
     "maximize": "Maximize",
     "restore": "Restore",
     "close": "Close"
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "settings": "Settings"
+  },
+  "settings": {
+    "language": "Switch Language",
+    "theme": "Switch Theme"
   }
 }
