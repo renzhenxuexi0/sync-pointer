@@ -19,9 +19,36 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
-# tauri plugin
+# tauri plugin 日志
 tauri-plugin-log = "2"
+# tauri plugin 存储状态
 tauri-plugin-valtio = "0.2.2"
-# other
+# 错误
+anyhow = "1.0"
+# 序列化
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+# 服务发现
+mdns-sd = "0.13.2"
+# 应用路径
+directories = "6.0"
+# 日志
+log = "0.4"
+# 在函数定义前添加 #[tracing::instrument]，当函数被调用时，tracing 库会自动记录函数的进入、退出情况以及执行时长等信息，并且可以携带函数的参数等作为额外的上下文信息
+tracing = { version = "0.1.41", features = ["default"] }
+# 将 Rust 的错误类型与 Tracing 的 span 相关联的库
+# 当出现错误时，通常希望能将错误的发生与当时的执行上下文（也就是 tracing 所记录的 span 相关信息）结合起来，以便更好地理解错误产生的背景和原因
+tracing-error = "0.2.1"
+# 配置和管理 tracing 所产生的日志和追踪数据的收集、格式化以及输出等操作
+tracing-subscriber = { version = "0.3", default-features = true, features = [
+    'tracing-log',
+    "env-filter",
+    "local-time",
+    "chrono",
+] }
+# 处理日志数据的写入目标和写入方式
+tracing-appender = "0.2.3"
+# 适配log
+tracing-log = "0.2"
+# 用于将 tracing 库产生的日志按照 Bunyan 格式进行格式化的库
+tracing-bunyan-formatter = "0.3.10"
