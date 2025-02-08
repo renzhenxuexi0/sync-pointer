@@ -1,5 +1,5 @@
 /* eslint-disable react/react-in-jsx-scope */
-import { BulbOutlined, SettingOutlined, TranslationOutlined } from '@ant-design/icons';
+import { MoonOutlined, SettingOutlined, SunOutlined, TranslationOutlined } from '@ant-design/icons';
 import { ConfigProvider, FloatButton, Layout, Menu, theme } from 'antd';
 import enUS from 'antd/lib/locale/en_US';
 import zhCN from 'antd/lib/locale/zh_CN';
@@ -15,6 +15,7 @@ function App() {
   const { t, i18n } = useTranslation();
   const preference = useSnapshot(preferenceStore.state);
 
+  // 只运行一次初始化语言
   useEffect(() => {
     i18n.changeLanguage(preference.locale);
   }, []);
@@ -35,11 +36,7 @@ function App() {
             items={[
               {
                 key: '1',
-                label: t('menu.dashboard'),
-              },
-              {
-                key: '2',
-                label: t('menu.settings'),
+                label: t('menu.screen-layout'),
               },
             ]}
           />
@@ -58,15 +55,19 @@ function App() {
         >
           <FloatButton
             icon={<TranslationOutlined />}
-            tooltip={t('settings.language')}
+            tooltip={
+              preference.locale === 'zh' ? t('settings.language.zh') : t('settings.language.en')
+            }
             onClick={() => {
               const newLocale = preference.locale === 'zh' ? 'en' : 'zh';
               setPreferenceLocale(newLocale);
             }}
           />
           <FloatButton
-            icon={<BulbOutlined />}
-            tooltip={t('settings.theme')}
+            icon={preference.theme === 'dark' ? <MoonOutlined /> : <SunOutlined />}
+            tooltip={
+              preference.theme === 'dark' ? t('settings.theme.dark') : t('settings.theme.light')
+            }
             onClick={() => {
               const newTheme = preference.theme === 'dark' ? 'light' : 'dark';
               setPreferenceTheme(newTheme);

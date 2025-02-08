@@ -4,6 +4,7 @@
     "": {
       "name": "sync-pointer",
       "dependencies": {
+        "@ant-design/icons": "^5.6.1",
         "@tailwindcss/vite": "4.0.3",
         "@tauri-apps/api": "^2",
         "@tauri-apps/plugin-log": "^2",
@@ -47,7 +48,7 @@
 
     "@ant-design/fast-color": ["@ant-design/fast-color@2.0.6", "https://registry.npmmirror.com/@ant-design/fast-color/-/fast-color-2.0.6.tgz", { "dependencies": { "@babel/runtime": "^7.24.7" } }, "sha512-y2217gk4NqL35giHl72o6Zzqji9O7vHh9YmhUVkPtAOpoTCH4uWxo/pr4VE8t0+ChEPs0qo4eJRC5Q1eXWo3vA=="],
 
-    "@ant-design/icons": ["@ant-design/icons@5.6.0", "https://registry.npmmirror.com/@ant-design/icons/-/icons-5.6.0.tgz", { "dependencies": { "@ant-design/colors": "^7.0.0", "@ant-design/icons-svg": "^4.4.0", "@babel/runtime": "^7.24.8", "classnames": "^2.2.6", "rc-util": "^5.31.1" }, "peerDependencies": { "react": ">=16.0.0", "react-dom": ">=16.0.0" } }, "sha512-Mb6QkQmPLZsmIHJ6oBsoyKrrT8/kAUdQ6+8q38e2bQSclROi69SiDlI4zZroaIPseae1w110RJH0zGrphAvlSQ=="],
+    "@ant-design/icons": ["@ant-design/icons@5.6.1", "https://registry.npmmirror.com/@ant-design/icons/-/icons-5.6.1.tgz", { "dependencies": { "@ant-design/colors": "^7.0.0", "@ant-design/icons-svg": "^4.4.0", "@babel/runtime": "^7.24.8", "classnames": "^2.2.6", "rc-util": "^5.31.1" }, "peerDependencies": { "react": ">=16.0.0", "react-dom": ">=16.0.0" } }, "sha512-0/xS39c91WjPAZOWsvi1//zjx6kAp4kxWwctR6kuU6p133w8RU0D2dSCvZC19uQyharg/sAvYxGYWl01BbZZfg=="],
 
     "@ant-design/icons-svg": ["@ant-design/icons-svg@4.4.2", "https://registry.npmmirror.com/@ant-design/icons-svg/-/icons-svg-4.4.2.tgz", {}, "sha512-vHbT+zJEVzllwP+CM+ul7reTEfBR0vgxFe7+lREAsAA7YGsYpboiq2sQNeQeRvh09GfQgs/GyFEvZpJ9cLXpXA=="],
 
@@ -958,6 +959,8 @@
     "@typescript-eslint/typescript-estree/minimatch": ["minimatch@9.0.5", "https://registry.npmmirror.com/minimatch/-/minimatch-9.0.5.tgz", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
 
     "@typescript-eslint/typescript-estree/semver": ["semver@7.7.1", "https://registry.npmmirror.com/semver/-/semver-7.7.1.tgz", { "bin": { "semver": "bin/semver.js" } }, "sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA=="],
+
+    "antd/@ant-design/icons": ["@ant-design/icons@5.6.0", "https://registry.npmmirror.com/@ant-design/icons/-/icons-5.6.0.tgz", { "dependencies": { "@ant-design/colors": "^7.0.0", "@ant-design/icons-svg": "^4.4.0", "@babel/runtime": "^7.24.8", "classnames": "^2.2.6", "rc-util": "^5.31.1" }, "peerDependencies": { "react": ">=16.0.0", "react-dom": ">=16.0.0" } }, "sha512-Mb6QkQmPLZsmIHJ6oBsoyKrrT8/kAUdQ6+8q38e2bQSclROi69SiDlI4zZroaIPseae1w110RJH0zGrphAvlSQ=="],
 
     "fast-glob/glob-parent": ["glob-parent@5.1.2", "https://registry.npmmirror.com/glob-parent/-/glob-parent-5.1.2.tgz", { "dependencies": { "is-glob": "^4.0.1" } }, "sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow=="],
 

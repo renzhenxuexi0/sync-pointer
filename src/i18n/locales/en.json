@@ -12,11 +12,16 @@
     "close": "Close"
   },
   "menu": {
-    "dashboard": "Dashboard",
-    "settings": "Settings"
+    "screen-layout": "Screen Layout"
   },
   "settings": {
-    "language": "Switch Language",
-    "theme": "Switch Theme"
+    "language": {
+      "zh": "Chinese",
+      "en": "English"
+    },
+    "theme": {
+      "light": "Light",
+      "dark": "Dark"
+    }
   }
 }
