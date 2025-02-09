@@ -9,5 +9,6 @@
     "source.sortImports": "always",
     // 使用eslint来fix，包括格式化会自动fix和代码质量检查会给出错误提示
     "source.fixAll.eslint": "always"
-  }
+  },
+  "i18n-ally.keystyle": "nested"
 }

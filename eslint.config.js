@@ -15,6 +15,8 @@ export default [
   {
     rules: {
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
+      'react/jsx-uses-react': 'off', // 关闭旧模式校验
+      'react/react-in-jsx-scope': 'off', // 关闭旧模式校验
     },
   },
 ];
