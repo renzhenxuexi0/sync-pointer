@@ -35,4 +35,4 @@ directories = "6.0"
 # 日志
 log = "0.4"
 # 时间相关
-chrono = "0.4"
+chrono = { version = "0.4", features = ["clock"] }
