@@ -18,11 +18,13 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["tray-icon"] }
 # tauri plugin 日志
 tauri-plugin-log = "2"
 # tauri plugin 存储状态
-tauri-plugin-valtio = "0.2.2"
+tauri-plugin-valtio = "1"
+# 异步运行时
+tokio = { version = "1" }
 # 错误
 anyhow = "1.0"
 # 序列化
@@ -36,3 +38,4 @@ directories = "6.0"
 log = "0.4"
 # 时间相关
 chrono = { version = "0.4", features = ["clock"] }
+tauri-plugin-devtools = "2.0.0"

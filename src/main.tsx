@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router';
 import App from './App';
 import './i18n';
 import { initStore } from './store';
+import './tauri/tray';
 
 await initStore();
 

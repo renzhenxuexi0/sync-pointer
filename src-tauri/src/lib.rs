@@ -11,9 +11,12 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    // devtools
+    #[cfg(debug_assertions)] // only enable instrumentation in development builds
+    let devtools = tauri_plugin_devtools::init();
+
+    let mut builder = tauri::Builder::default()
         .setup(|_app| Ok(()))
         .plugin(
             tauri_plugin_log::Builder::new()
@@ -37,7 +40,15 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_valtio::init())
-        .invoke_handler(tauri::generate_handler![greet])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .invoke_handler(tauri::generate_handler![greet]);
+
+    #[cfg(debug_assertions)]
+    {
+        builder = builder.plugin(devtools);
+    }
+
+    let app =
+        builder.build(tauri::generate_context!()).expect("error while running tauri application");
+
+    app.run(|_, _e| {});
 }
