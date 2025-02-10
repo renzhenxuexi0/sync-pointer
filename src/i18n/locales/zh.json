@@ -22,6 +22,8 @@
     "theme": {
       "light": "浅色",
       "dark": "深色"
-    }
+    },
+    "server": "服务端",
+    "client": "客户端"
   }
 }

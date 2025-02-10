@@ -7,6 +7,7 @@ import { store } from 'tauri-plugin-valtio';
 export interface Preference {
   theme: 'light' | 'dark';
   locale: 'zh' | 'en';
+  serverEnabled: boolean;
 }
 
 export const preferenceStore = store(
@@ -14,6 +15,7 @@ export const preferenceStore = store(
   {
     locale: 'zh',
     theme: 'light',
+    serverEnabled: false,
   },
   {
     saveOnChange: true,
