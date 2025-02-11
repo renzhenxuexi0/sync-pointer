@@ -1,8 +1,8 @@
 import i18n from '@/i18n';
-import { setTheme } from '@tauri-apps/api/app';
-import { debug } from '@tauri-apps/plugin-log';
+import { invoke } from '@tauri-apps/api/core';
 import { theme } from 'antd';
 import { store } from 'tauri-plugin-valtio';
+const sys_locale: string = await invoke('get_sys_locale');
 
 export interface Preference {
   theme: 'light' | 'dark';
@@ -13,7 +13,7 @@ export interface Preference {
 export const preferenceStore = store(
   'preference',
   {
-    locale: 'zh',
+    locale: sys_locale === 'zh-CN' ? 'zh' : 'en',
     theme: 'light',
     serverEnabled: false,
   },
@@ -35,11 +35,8 @@ export function setPreferenceLocale(locale: Preference['locale']) {
   preferenceStore.state.locale = locale;
   i18n.changeLanguage(locale);
   document.documentElement.lang = locale;
-  debug(`切换语言 ${locale}`);
 }
 
 export function setPreferenceTheme(theme: Preference['theme']) {
   preferenceStore.state.theme = theme;
-  setTheme(theme);
-  debug(`切换主题 ${theme}`);
 }

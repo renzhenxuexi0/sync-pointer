@@ -19,23 +19,22 @@ tauri-build = { version = "2", features = ["config-json5"] }
 
 [dependencies]
 tauri = { version = "2", features = ["tray-icon", "config-json5"] }
-# tauri plugin 日志
-tauri-plugin-log = "2"
 # tauri plugin 存储状态
 tauri-plugin-valtio = "1"
-# 异步运行时
+# tauri plugin 开发工具
+tauri-plugin-devtools = "2"
+# 多线程相关
 tokio = { version = "1" }
+parking_lot = "0.12"
 # 错误
 anyhow = "1.0"
 # 序列化
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # 服务发现
-mdns-sd = "0.13.2"
-# 应用路径
-directories = "6.0"
+mdns-sd = "0.13"
 # 日志
 log = "0.4"
-# 时间相关
-chrono = { version = "0.4", features = ["clock"] }
-tauri-plugin-devtools = "2.0.0"
+# 本地化
+rust-i18n = "3"
+sys-locale = "0.3"
