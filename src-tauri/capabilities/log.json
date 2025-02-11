@@ -2,6 +2,6 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "log",
   "description": "Log Capability",
-  "windows": ["*"],
+  "windows": ["main"],
   "permissions": ["log:default"]
 }

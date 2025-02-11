@@ -2,6 +2,6 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "description": "valtio Capability",
   "identifier": "valtio",
-  "windows": ["*"],
+  "windows": ["main"],
   "permissions": ["valtio:default", "core:event:default"]
 }
