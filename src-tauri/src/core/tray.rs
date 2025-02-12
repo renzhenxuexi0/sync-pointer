@@ -4,12 +4,14 @@ use anyhow::Result;
 use spdlog::debug;
 use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconEvent, TrayIconId},
-    AppHandle, Manager,
+    Manager,
 };
 
 use crate::constant;
 
-#[derive(Debug, Default, Clone)]
+use super::handle::Handle;
+
+#[derive(Default)]
 pub struct Tray {}
 
 impl Tray {
@@ -20,9 +22,10 @@ impl Tray {
     }
 
     /// 初始化
-    pub fn init(&self, handle: &AppHandle) -> Result<()> {
+    pub fn init(&self) -> Result<()> {
+        let app_handle = Handle::instance().app_handle().unwrap();
         let tray_icon_id = TrayIconId::new(constant::TRAY_ICON_ID);
-        let tray = handle.tray_by_id(&tray_icon_id).unwrap();
+        let tray = app_handle.tray_by_id(&tray_icon_id).unwrap();
         tray.on_tray_icon_event(|tray, event| match event {
             TrayIconEvent::Click {
                 button: MouseButton::Left,

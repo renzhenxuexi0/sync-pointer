@@ -27,7 +27,8 @@ pub fn run() {
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::new().build())
         .setup(|app| {
-            core::tray::Tray::instance().init(app.handle())?;
+            core::handle::Handle::instance().init(app.handle());
+            core::tray::Tray::instance().init()?;
             config::log::init(app.path().app_log_dir()?)?;
             Ok(())
         });
