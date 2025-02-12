@@ -1,12 +1,15 @@
+use tauri::Manager;
+
 pub mod api;
 pub mod client;
+pub mod config;
 pub mod constant;
 pub mod core;
 pub mod server;
 
 #[macro_use]
 extern crate rust_i18n;
-
+// 初始化国际化
 i18n!("locales", fallback = "zh");
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -22,21 +25,22 @@ pub fn run() {
     let devtools = tauri_plugin_devtools::init();
 
     let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::new().build())
         .setup(|app| {
-            core::tray::Tray::instance().init(app)?;
+            core::tray::Tray::instance().init(app.handle())?;
+            config::log::init(app.path().app_log_dir()?)?;
             Ok(())
-        })
-        .plugin(tauri_plugin_valtio::init());
+        });
 
     #[cfg(debug_assertions)]
     {
         builder = builder.plugin(devtools);
     }
-
-    let app = builder
-        .invoke_handler(tauri::generate_handler![greet, api::sys::get_sys_locale])
-        .build(tauri::generate_context!())
+    builder
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            api::sys::get_sys_locale
+        ])
+        .run(tauri::generate_context!())
         .expect("error while running tauri application");
-
-    app.run(|_, _e| {});
 }

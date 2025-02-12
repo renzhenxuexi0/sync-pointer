@@ -24,6 +24,8 @@
       "dark": "深色"
     },
     "server": "服务端",
-    "client": "客户端"
+    "client": "客户端",
+    "start": "启动",
+    "stop": "停止"
   }
 }

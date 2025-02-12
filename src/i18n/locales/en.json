@@ -22,6 +22,10 @@
     "theme": {
       "light": "Light",
       "dark": "Dark"
-    }
+    },
+    "server": "Server",
+    "client": "Client",
+    "start": "Start",
+    "stop": "stop"
   }
 }

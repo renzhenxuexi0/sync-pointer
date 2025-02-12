@@ -1,4 +1,4 @@
-use log::info;
+use spdlog::info;
 use sys_locale::get_locale;
 use tauri::Runtime;
 

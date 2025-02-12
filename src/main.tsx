@@ -3,9 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 import App from './App';
 import './i18n';
-import { initStore } from './store';
-
-await initStore();
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <BrowserRouter>

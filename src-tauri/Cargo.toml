@@ -19,8 +19,6 @@ tauri-build = { version = "2", features = ["config-json5"] }
 
 [dependencies]
 tauri = { version = "2", features = ["tray-icon", "config-json5"] }
-# tauri plugin 存储状态
-tauri-plugin-valtio = "1"
 # tauri plugin 开发工具
 tauri-plugin-devtools = "2"
 # 多线程相关
@@ -34,7 +32,8 @@ serde_json = "1"
 # 服务发现
 mdns-sd = "0.13"
 # 日志
-log = "0.4"
+spdlog-rs = { version = "0.4.1" }
 # 本地化
 rust-i18n = "3"
 sys-locale = "0.3"
+tauri-plugin-store = "2"

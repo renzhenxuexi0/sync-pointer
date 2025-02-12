@@ -1,10 +1,10 @@
 use std::sync::OnceLock;
 
 use anyhow::Result;
-use log::debug;
+use spdlog::debug;
 use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconEvent, TrayIconId},
-    App, Manager,
+    AppHandle, Manager,
 };
 
 use crate::constant;
@@ -20,9 +20,9 @@ impl Tray {
     }
 
     /// 初始化
-    pub fn init(&self, app: &mut App) -> Result<()> {
+    pub fn init(&self, handle: &AppHandle) -> Result<()> {
         let tray_icon_id = TrayIconId::new(constant::TRAY_ICON_ID);
-        let tray = app.handle().tray_by_id(&tray_icon_id).unwrap();
+        let tray = handle.tray_by_id(&tray_icon_id).unwrap();
         tray.on_tray_icon_event(|tray, event| match event {
             TrayIconEvent::Click {
                 button: MouseButton::Left,

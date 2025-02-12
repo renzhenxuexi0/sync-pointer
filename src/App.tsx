@@ -20,7 +20,7 @@ import { preferenceStore, setPreferenceLocale, setPreferenceTheme } from './stor
 
 function App() {
   const { t, i18n } = useTranslation();
-  const preference = useSnapshot(preferenceStore.state);
+  const preference = useSnapshot(preferenceStore);
   // 只运行一次初始化语言
   useEffect(() => {
     i18n.changeLanguage(preference.locale);
@@ -83,8 +83,7 @@ function App() {
           />
         }
         route={{
-          path: '/ScreenLayout',
-          routes: [
+          children: [
             {
               path: '/ScreenLayout',
               name: t('menu.screen-layout'),
@@ -92,11 +91,13 @@ function App() {
             },
           ],
         }}
-        items={[{ key: '1', title: 'Menu Item 1' }]}
+        location={{
+          pathname: '/ScreenLayout',
+        }}
         actionsRender={() => {
           return [<GithubFilled key="GithubFilled" />];
         }}
-        menuItemRender={(item, dom) => <NavLink to={item.path ?? '/'}>{dom}</NavLink>}
+        menuItemRender={(item, dom) => <NavLink to={item.path ?? '/ScreenLayout'}>{dom}</NavLink>}
         defaultCollapsed
       >
         {/* 内容区 */}
@@ -112,6 +113,16 @@ function App() {
           header={{
             title: undefined,
             extra: [
+              // 停止 | 开始 开关
+              <Switch
+                key="start-stop-switch"
+                checkedChildren={t('settings.start')}
+                unCheckedChildren={t('settings.stop')}
+                checked={preference.serverStarted}
+                onChange={(checked) => {
+                  preferenceStore.serverStarted = checked;
+                }}
+              />,
               // server|client 开关
               <Switch
                 key="server-client-switch"
@@ -119,7 +130,7 @@ function App() {
                 unCheckedChildren={t('settings.client')}
                 checked={preference.serverEnabled}
                 onChange={(checked) => {
-                  preferenceStore.state.serverEnabled = checked;
+                  preferenceStore.serverEnabled = checked;
                 }}
               />,
             ],
