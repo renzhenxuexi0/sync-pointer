@@ -1,13 +1,7 @@
-import {
-  AppstoreOutlined,
-  GithubFilled,
-  MoonOutlined,
-  SettingOutlined,
-  SunOutlined,
-  TranslationOutlined,
-} from '@ant-design/icons';
+import { AppstoreOutlined, GithubFilled, SettingOutlined } from '@ant-design/icons';
 import { PageContainer, ProLayout } from '@ant-design/pro-components';
-import { Avatar, ConfigProvider, FloatButton, Switch, theme } from 'antd';
+import { Avatar, ConfigProvider } from 'antd';
+import { ThemeProvider } from 'antd-style';
 import enUS from 'antd/lib/locale/en_US';
 import zhCN from 'antd/lib/locale/zh_CN';
 import { useEffect } from 'react';
@@ -16,128 +10,90 @@ import { NavLink, Route, Routes } from 'react-router';
 import { useSnapshot } from 'valtio';
 import './App.css';
 import ScreenLayout from './pages/ScreenLayout';
-import { preferenceStore, setPreferenceLocale, setPreferenceTheme } from './store/preference';
+import Settings from './pages/settings';
+import { preferenceStore, setPreferenceLocale } from './store/preference';
 
 function App() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const preference = useSnapshot(preferenceStore);
   // 只运行一次初始化语言
   useEffect(() => {
-    i18n.changeLanguage(preference.locale);
+    setPreferenceLocale(preference.locale);
   }, []);
 
-  const renderSettingsButtons = () => (
-    <FloatButton.Group
-      trigger="click"
-      type="default"
-      style={{ insetInlineEnd: 24 }}
-      icon={<SettingOutlined />}
-    >
-      <FloatButton
-        icon={<TranslationOutlined />}
-        tooltip={preference.locale === 'zh' ? t('settings.language.zh') : t('settings.language.en')}
-        onClick={() => {
-          const newLocale = preference.locale === 'zh' ? 'en' : 'zh';
-          setPreferenceLocale(newLocale);
-        }}
-      />
-      <FloatButton
-        icon={preference.theme === 'dark' ? <MoonOutlined /> : <SunOutlined />}
-        tooltip={preference.theme === 'dark' ? t('settings.theme.dark') : t('settings.theme.light')}
-        onClick={() => {
-          const newTheme = preference.theme === 'dark' ? 'light' : 'dark';
-          setPreferenceTheme(newTheme);
-        }}
-      />
-    </FloatButton.Group>
-  );
-
   return (
-    <ConfigProvider
-      locale={preference.locale === 'zh' ? zhCN : enUS}
-      theme={{
-        components: {
-          Layout: {
-            triggerHeight: 24,
-            triggerColor: '#fff',
-            triggerBg: '#fff',
-          },
-        },
-        algorithm: preference.theme === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
-      }}
-    >
-      {/* 整个布局 */}
-      <ProLayout
-        title={t('app.title')}
-        logo={
-          <Avatar
-            alt={t('app.title')}
-            shape="square"
-            size="large"
-            src={
-              <img
-                src={'icon.png'}
-                alt="avatar"
-              />
-            }
-          />
-        }
-        route={{
-          children: [
-            {
-              path: '/ScreenLayout',
-              name: t('menu.screen-layout'),
-              icon: <AppstoreOutlined className="!text-[#08c]" />,
+    <ConfigProvider locale={preference.locale === 'zh' ? zhCN : enUS}>
+      <ThemeProvider
+        themeMode={preference.theme}
+        theme={{
+          components: {
+            Layout: {
+              triggerHeight: 24,
+              triggerColor: '#fff',
+              triggerBg: '#fff',
             },
-          ],
+          },
         }}
-        location={{
-          pathname: '/ScreenLayout',
-        }}
-        actionsRender={() => {
-          return [<GithubFilled key="GithubFilled" />];
-        }}
-        menuItemRender={(item, dom) => <NavLink to={item.path ?? '/ScreenLayout'}>{dom}</NavLink>}
-        defaultCollapsed
       >
-        {/* 内容区 */}
-        <PageContainer
-          content={
-            <Routes>
-              <Route
-                path="ScreenLayout"
-                element={<ScreenLayout />}
-              ></Route>
-            </Routes>
+        {/* 整个布局 */}
+        <ProLayout
+          title={t('app.title')}
+          logo={
+            <Avatar
+              alt={t('app.title')}
+              shape="square"
+              size="large"
+              src={
+                <img
+                  src={'icon.png'}
+                  alt="avatar"
+                />
+              }
+            />
           }
-          header={{
-            title: undefined,
-            extra: [
-              // 停止 | 开始 开关
-              <Switch
-                key="start-stop-switch"
-                checkedChildren={t('settings.start')}
-                unCheckedChildren={t('settings.stop')}
-                checked={preference.serverStarted}
-                onChange={(checked) => {
-                  preferenceStore.serverStarted = checked;
-                }}
-              />,
-              // server|client 开关
-              <Switch
-                key="server-client-switch"
-                checkedChildren={t('settings.server')}
-                unCheckedChildren={t('settings.client')}
-                checked={preference.serverEnabled}
-                onChange={(checked) => {
-                  preferenceStore.serverEnabled = checked;
-                }}
-              />,
+          route={{
+            children: [
+              {
+                path: '/ScreenLayout',
+                name: t('menu.screen-layout'),
+                icon: <AppstoreOutlined className="!text-[#08c]" />,
+              },
+              {
+                path: '/Settings',
+                name: t('menu.settings'),
+                icon: <SettingOutlined className="!text-[#08c]" />,
+              },
             ],
           }}
-        ></PageContainer>
-        {renderSettingsButtons()}
-      </ProLayout>
+          location={{
+            pathname: '/ScreenLayout',
+          }}
+          actionsRender={() => {
+            return [<GithubFilled key="GithubFilled" />];
+          }}
+          menuItemRender={(item, dom) => <NavLink to={item.path ?? '/ScreenLayout'}>{dom}</NavLink>}
+          defaultCollapsed
+        >
+          {/* 内容区 */}
+          <PageContainer
+            content={
+              <Routes>
+                <Route
+                  path="ScreenLayout"
+                  element={<ScreenLayout />}
+                ></Route>
+                <Route
+                  path="Settings"
+                  element={<Settings />}
+                ></Route>
+              </Routes>
+            }
+            header={{
+              title: undefined,
+            }}
+          ></PageContainer>
+        </ProLayout>
+      </ThemeProvider>
     </ConfigProvider>
   );
 }

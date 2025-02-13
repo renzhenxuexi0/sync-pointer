@@ -12,9 +12,11 @@
     "close": "关闭"
   },
   "menu": {
-    "screen-layout": "屏幕布局"
+    "screen-layout": "屏幕布局",
+    "settings": "设置"
   },
   "settings": {
+    "system": "跟随系统",
     "language": {
       "zh": "中文",
       "en": "英文"
@@ -24,8 +26,6 @@
       "dark": "深色"
     },
     "server": "服务端",
-    "client": "客户端",
-    "start": "启动",
-    "stop": "停止"
+    "client": "客户端"
   }
 }

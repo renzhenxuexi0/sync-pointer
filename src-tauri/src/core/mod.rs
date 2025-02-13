@@ -1,2 +1,2 @@
-pub mod tray;
 pub mod handle;
+pub mod tray;

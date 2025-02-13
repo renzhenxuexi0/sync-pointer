@@ -1,7 +1,7 @@
 use std::sync::OnceLock;
 
 use anyhow::Result;
-use spdlog::debug;
+use spdlog::info;
 use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconEvent, TrayIconId},
     Manager,
@@ -17,8 +17,8 @@ pub struct Tray {}
 impl Tray {
     /// 获取单例
     pub fn instance() -> &'static Self {
-        static ONCE: OnceLock<Tray> = OnceLock::new();
-        ONCE.get_or_init(|| Tray {})
+        static TRAY: OnceLock<Tray> = OnceLock::new();
+        TRAY.get_or_init(|| Tray {})
     }
 
     /// 初始化
@@ -26,13 +26,14 @@ impl Tray {
         let app_handle = Handle::instance().app_handle().unwrap();
         let tray_icon_id = TrayIconId::new(constant::TRAY_ICON_ID);
         let tray = app_handle.tray_by_id(&tray_icon_id).unwrap();
-        tray.on_tray_icon_event(|tray, event| match event {
-            TrayIconEvent::Click {
+        tray.on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click {
                 button: MouseButton::Left,
                 button_state: MouseButtonState::Up,
                 ..
-            } => {
-                debug!("left click pressed and released");
+            } = event
+            {
+                info!("left click pressed and released");
                 // in this example, let's show and focus the main window when the tray is clicked
                 let app = tray.app_handle();
                 if let Some(window) =
@@ -41,9 +42,6 @@ impl Tray {
                     let _ = window.show();
                     let _ = window.set_focus();
                 }
-            }
-            _ => {
-                debug!("unhandled event {event:?}");
             }
         });
 

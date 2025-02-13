@@ -1,28 +1,26 @@
 import i18n from '@/i18n';
 import { setTheme } from '@tauri-apps/api/app';
-import { invoke } from '@tauri-apps/api/core';
+import { locale } from '@tauri-apps/plugin-os';
 import { LazyStore } from '@tauri-apps/plugin-store';
 import { theme } from 'antd';
 import { proxy, subscribe } from 'valtio';
-const sys_locale: string = await invoke('get_sys_locale');
 
+// 获取系统语言
+const sys_locale = (await locale())?.includes('zh') ? 'zh' : 'en';
 // 本地 store
 const preferenceLocalStore = new LazyStore('preference.json');
-
 export interface Preference {
-  theme: 'light' | 'dark';
-  locale: 'zh' | 'en';
+  theme: 'light' | 'dark' | 'auto';
+  locale: 'zh' | 'en' | 'auto';
   serverEnabled: boolean;
-  serverStarted: boolean;
 }
 
 const preference = await preferenceLocalStore.get<Preference>('preference');
 
 export const preferenceStore = proxy<Preference>({
-  locale: preference?.locale || (sys_locale === 'zh-CN' ? 'zh' : 'en'),
+  locale: preference?.locale === 'auto' ? sys_locale || 'zh' : preference?.locale || 'auto',
   theme: preference?.theme || 'light',
   serverEnabled: preference?.serverEnabled || false,
-  serverStarted: preference?.serverStarted || false,
 });
 
 export function getAntdTheme() {
@@ -35,13 +33,18 @@ export function getAntdTheme() {
 
 export function setPreferenceLocale(locale: Preference['locale']) {
   preferenceStore.locale = locale;
-  i18n.changeLanguage(locale);
-  document.documentElement.lang = locale;
+  if (locale !== 'auto') {
+    i18n.changeLanguage(locale);
+    document.documentElement.lang = locale;
+  } else {
+    i18n.changeLanguage(sys_locale);
+    document.documentElement.lang = sys_locale;
+  }
 }
 
 export async function setPreferenceTheme(theme: Preference['theme']) {
   preferenceStore.theme = theme;
-  await setTheme(theme);
+  await setTheme(theme === 'auto' ? undefined : theme);
 }
 subscribe(preferenceStore, () => {
   preferenceLocalStore.set('preference', preferenceStore);

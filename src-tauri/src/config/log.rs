@@ -1,7 +1,10 @@
 use std::{path::PathBuf, sync::Arc};
 
 use anyhow::Result;
-use spdlog::sink::{RotatingFileSink, StdStreamSink};
+use spdlog::{
+    error,
+    sink::{RotatingFileSink, StdStreamSink},
+};
 
 /// 初始化日志
 pub fn init(log_path: PathBuf) -> Result<()> {
@@ -16,23 +19,24 @@ pub fn init(log_path: PathBuf) -> Result<()> {
                 .rotation_policy(spdlog::sink::RotationPolicy::FileSize(
                     1024 * 1024 * 5,
                 ))
+                .error_handler(|e| error!("err: {}", e))
                 .build()?,
         );
         // 普通控制台日志
         let console_sink = Arc::new(
             StdStreamSink::builder()
-                .level_filter(spdlog::LevelFilter::MoreVerbose(
+                .level_filter(spdlog::LevelFilter::MoreSevere(
                     spdlog::Level::Debug,
                 ))
                 .style_mode(spdlog::terminal_style::StyleMode::Auto)
                 .stdout()
                 .build()?,
         );
-        new.sinks_mut().push(console_sink);
         new.sinks_mut().push(rotating_logger);
+        new.sinks_mut().push(console_sink);
         Ok(())
     })?;
-
+    default_log.set_flush_level_filter(spdlog::LevelFilter::All);
     spdlog::set_default_logger(default_log);
     Ok(())
 }

@@ -7,14 +7,12 @@
   ],
   "permissions": [
     "core:default",
-    "core:event:allow-emit",
-    "core:event:allow-emit-to",
-    "core:event:allow-listen",
-    "core:event:allow-unlisten",
     "core:app:allow-default-window-icon",
     "core:app:allow-set-app-theme",
     "core:window:allow-set-theme",
     "core:window:allow-theme",
-    "store:default"
+    "store:default",
+    "fs:default",
+    "os:default"
   ]
 }

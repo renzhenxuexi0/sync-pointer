@@ -28,7 +28,7 @@
       "id": "main",
       "iconPath": "icons/tray-disconnected.ico",
       "iconAsTemplate": true,
-      "showMenuOnLeftClick": true
+      "showMenuOnLeftClick": false
     }
   },
   "bundle": {
