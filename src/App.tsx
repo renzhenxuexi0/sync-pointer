@@ -4,7 +4,7 @@ import { Avatar, ConfigProvider } from 'antd';
 import { ThemeProvider } from 'antd-style';
 import enUS from 'antd/lib/locale/en_US';
 import zhCN from 'antd/lib/locale/zh_CN';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Route, Routes } from 'react-router';
 import { useSnapshot } from 'valtio';
@@ -16,6 +16,7 @@ import { preferenceStore, setPreferenceLocale } from './store/preference';
 function App() {
   const { t } = useTranslation();
   const preference = useSnapshot(preferenceStore);
+  const [pathname, setPathname] = useState<string>('/ScreenLayout');
   // 只运行一次初始化语言
   useEffect(() => {
     setPreferenceLocale(preference.locale);
@@ -66,12 +67,21 @@ function App() {
             ],
           }}
           location={{
-            pathname: '/ScreenLayout',
+            pathname: pathname,
           }}
           actionsRender={() => {
             return [<GithubFilled key="GithubFilled" />];
           }}
-          menuItemRender={(item, dom) => <NavLink to={item.path ?? '/ScreenLayout'}>{dom}</NavLink>}
+          menuItemRender={(item, dom) => {
+            return (
+              <NavLink
+                to={item.path ?? '/ScreenLayout'}
+                onClick={() => setPathname(item.path ?? '/ScreenLayout')}
+              >
+                {dom}
+              </NavLink>
+            );
+          }}
           defaultCollapsed
         >
           {/* 内容区 */}

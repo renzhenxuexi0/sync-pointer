@@ -16,16 +16,22 @@
     "settings": "设置"
   },
   "settings": {
-    "system": "跟随系统",
+    "system": "系统",
     "language": {
+      "label": "语言",
       "zh": "中文",
       "en": "英文"
     },
     "theme": {
+      "label": "主题",
       "light": "浅色",
       "dark": "深色"
     },
-    "server": "服务端",
-    "client": "客户端"
+    "service-type": {
+      "label": "服务类型",
+      "server": "服务端",
+      "client": "客户端"
+    },
+    "system-settings": "系统设置"
   }
 }

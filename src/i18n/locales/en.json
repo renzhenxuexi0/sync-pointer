@@ -12,19 +12,26 @@
     "close": "Close"
   },
   "menu": {
-    "screen-layout": "Screen Layout"
+    "screen-layout": "Screen Layout",
+    "settings": "Settings"
   },
   "settings": {
     "system": "System",
     "language": {
+      "label": "Language",
       "zh": "Chinese",
       "en": "English"
     },
     "theme": {
+      "label": "Theme",
       "light": "Light",
       "dark": "Dark"
     },
-    "server": "Server",
-    "client": "Client"
+    "service-type": {
+      "label": "Service Type",
+      "server": "Server",
+      "client": "Client"
+    },
+    "system-settings": "System Settings"
   }
 }
