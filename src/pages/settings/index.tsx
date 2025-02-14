@@ -1,4 +1,9 @@
-import { preferenceStore, setPreferenceLocale, setPreferenceTheme } from '@/store/preference';
+import {
+  preferenceStore,
+  setPreferenceLocale,
+  setPreferenceServiceType,
+  setPreferenceTheme,
+} from '@/store/preference';
 import { Card, Col, Form, Radio, Row } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
@@ -19,14 +24,14 @@ function Settings() {
                 {/* 服务类型单选 */}
                 <Radio.Group
                   block
-                  defaultValue={preference.serverEnabled ? 'server' : 'client'}
+                  defaultValue={preference.serviceType}
                   options={[
                     { label: t('settings.service-type.server'), value: 'server' },
                     { label: t('settings.service-type.client'), value: 'client' },
                   ]}
                   optionType="button"
                   onChange={(e) => {
-                    preferenceStore.serverEnabled = e.target.value === 'server';
+                    setPreferenceServiceType(e.target.value);
                   }}
                 />
               </Form.Item>

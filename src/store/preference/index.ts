@@ -12,7 +12,7 @@ const preferenceLocalStore = new LazyStore('preference.json');
 export interface Preference {
   theme: 'light' | 'dark' | 'auto';
   locale: 'zh' | 'en' | 'auto';
-  serverEnabled: boolean;
+  serviceType: 'server' | 'client';
 }
 
 const preference = await preferenceLocalStore.get<Preference>('preference');
@@ -20,7 +20,7 @@ const preference = await preferenceLocalStore.get<Preference>('preference');
 export const preferenceStore = proxy<Preference>({
   locale: preference?.locale === 'auto' ? sys_locale || 'zh' : preference?.locale || 'auto',
   theme: preference?.theme || 'light',
-  serverEnabled: preference?.serverEnabled || false,
+  serviceType: preference?.serviceType || 'client',
 });
 
 export function getAntdTheme() {
@@ -42,10 +42,15 @@ export function setPreferenceLocale(locale: Preference['locale']) {
   }
 }
 
+export function setPreferenceServiceType(serviceType: Preference['serviceType']) {
+  preferenceStore.serviceType = serviceType;
+}
+
 export async function setPreferenceTheme(theme: Preference['theme']) {
   preferenceStore.theme = theme;
   await setTheme(theme === 'auto' ? undefined : theme);
 }
+// 订阅 store 变化，持久化到本地
 subscribe(preferenceStore, () => {
   preferenceLocalStore.set('preference', preferenceStore);
 });
