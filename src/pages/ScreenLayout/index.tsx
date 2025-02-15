@@ -1,6 +1,7 @@
 import { preferenceStore } from '@/store/preference';
 import { DndContext, MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { Alert } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
 import { Device } from './components/DeviceCell';
@@ -13,7 +14,7 @@ function ScreenLayout() {
 
   const sensors = useSensors(mouseSensor);
 
-  const devices: Device[] = [
+  const [devices, setDevices] = useState<Device[]>([
     {
       hostname: 'wuhy',
       serviceType: 'server',
@@ -25,10 +26,19 @@ function ScreenLayout() {
       },
       status: 'online',
     },
-  ];
+  ]);
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4">
+    <div
+      className={`
+        flex
+        h-full
+        flex-col
+        items-center
+        justify-center
+        gap-4
+      `}
+    >
       {preference.serviceSettings.serviceType === 'client' ? (
         <Alert
           message={t('screen-layout.client-alert')}
@@ -41,9 +51,18 @@ function ScreenLayout() {
       )}
       <DndContext
         sensors={sensors}
-        onDragStart={() => {}}
-        onDragEnd={() => {}}
-        onDragCancel={() => {}}
+        onDragEnd={(e) => {
+          console.log(e);
+          if (e.over?.id) {
+            const [row, col] = (e.over.id as string).split('-').map(Number);
+            const device = devices.find((device) => e.active.id === device.hostname);
+            if (device) {
+              device.position.row = row;
+              device.position.col = col;
+              setDevices([...devices]);
+            }
+          }
+        }}
       >
         <DeviceGrid devices={devices}></DeviceGrid>
       </DndContext>

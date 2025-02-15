@@ -54,7 +54,7 @@ export default function SettingsCard<T extends Record<string, unknown>>({
         labelCol={{ span: 6 }}
         size="small"
         onFinish={onFinish}
-        onFinishFailed={handleReset}
+        onFinishFailed={() => form.resetFields()}
         onValuesChange={() => {
           setIsChanged(true);
         }}

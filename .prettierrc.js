@@ -22,7 +22,6 @@ const config = {
       },
     },
   ],
-  plugins: ['prettier-plugin-tailwindcss'],
   proseWrap: 'never',
 };
 

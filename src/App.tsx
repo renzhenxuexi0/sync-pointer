@@ -42,7 +42,10 @@ function App() {
         {/* 整个布局 */}
         <ProLayout
           title={t('app.title')}
-          className="h-screen w-screen"
+          className={`
+            h-screen
+            w-screen
+          `}
           logo={
             <Avatar
               alt={t('app.title')}
