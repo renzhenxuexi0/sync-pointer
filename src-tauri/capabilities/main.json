@@ -13,6 +13,7 @@
     "core:window:allow-theme",
     "store:default",
     "fs:default",
-    "os:default"
+    "os:default",
+    "os:allow-hostname"
   ]
 }

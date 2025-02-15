@@ -17,22 +17,32 @@
   },
   "settings": {
     "system": "系统",
-    "language": {
-      "label": "语言",
-      "zh": "中文",
-      "en": "英文"
+    "system-settings": {
+      "label": "系统设置",
+      "language": {
+        "label": "语言",
+        "zh": "中文",
+        "en": "英文"
+      },
+      "theme": {
+        "label": "主题",
+        "light": "浅色",
+        "dark": "深色"
+      }
     },
-    "theme": {
-      "label": "主题",
-      "light": "浅色",
-      "dark": "深色"
-    },
-    "service-type": {
-      "label": "服务类型",
-      "server": "服务端",
-      "client": "客户端"
-    },
-    "system-settings": "系统设置"
+    "service-settings": {
+      "label": "服务设置",
+      "hostname": {
+        "label": "主机名",
+        "tooltip": "主机名只支持字母数字和`-`符号",
+        "max": "最大长度为 15 个字符"
+      },
+      "service-type": {
+        "label": "服务类型",
+        "server": "服务端",
+        "client": "客户端"
+      }
+    }
   },
   "screen-layout": {
     "client-alert": "目前作为客户端, 只能查看不能操作!"

@@ -17,21 +17,30 @@
   },
   "settings": {
     "system": "System",
-    "language": {
-      "label": "Language",
-      "zh": "Chinese",
-      "en": "English"
+    "system-settings": {
+      "label": "System Settings",
+      "language": {
+        "label": "Language",
+        "zh": "Chinese",
+        "en": "English"
+      },
+      "theme": {
+        "label": "Theme",
+        "light": "Light",
+        "dark": "Dark"
+      }
     },
-    "theme": {
-      "label": "Theme",
-      "light": "Light",
-      "dark": "Dark"
-    },
-    "service-type": {
-      "label": "Service Type",
-      "server": "Server",
-      "client": "Client"
-    },
-    "system-settings": "System Settings"
+    "service-settings": {
+      "label": "Service Settings",
+      "hostname": "Hostname",
+      "service-type": {
+        "label": "Service Type",
+        "server": "Server",
+        "client": "Client"
+      }
+    }
+  },
+  "screen-layout": {
+    "client-alert": "Currently as a client, you can only view and not operate!"
   }
 }

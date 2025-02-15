@@ -5,17 +5,20 @@ interface DeviceGridProps {
   devices: Device[];
 }
 
-function gridCell(index: number, device: Device | undefined) {
-  const { setNodeRef } = useDroppable({
-    id: `device-${index}`,
+function gridCell(row: number, col: number, device: Device | undefined) {
+  const id = `device-${row}-${col}`;
+  const { setNodeRef, isOver } = useDroppable({
+    id,
   });
   return (
     <div
-      key={index}
+      key={id}
+      id={id}
       ref={setNodeRef}
-      className="flex h-24 w-30 items-center justify-center border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-600"
+      className="flex items-center justify-center border border-slate-200 bg-slate-100 sm:h-12 sm:w-16 md:h-18 md:w-24 lg:h-24 lg:w-32 dark:border-slate-700 dark:bg-slate-900"
     >
       {device && <DeviceCell {...device} />}
+      {<span>{isOver}</span>}
     </div>
   );
 }
@@ -29,7 +32,7 @@ function DeviceGrid({ devices }: DeviceGridProps) {
         const device = devices.find(
           (device) => device.position.row === row && device.position.col === col,
         );
-        return gridCell(index, device);
+        return gridCell(row, col, device);
       })}
     </div>
   );

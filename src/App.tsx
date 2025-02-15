@@ -11,21 +11,24 @@ import { useSnapshot } from 'valtio';
 import './App.css';
 import ScreenLayout from './pages/ScreenLayout';
 import Settings from './pages/settings';
-import { preferenceStore, setPreferenceLocale } from './store/preference';
+import { preferenceStore, updateSystemSettings } from './store/preference';
 
 function App() {
   const { t } = useTranslation();
-  const preference = useSnapshot(preferenceStore);
+  const systemSettings = useSnapshot(preferenceStore.systemSettings);
   const [pathname, setPathname] = useState<string>('/ScreenLayout');
   // 只运行一次初始化语言
   useEffect(() => {
-    setPreferenceLocale(preference.locale);
+    updateSystemSettings({
+      locale: systemSettings.locale,
+      theme: systemSettings.theme,
+    });
   }, []);
 
   return (
-    <ConfigProvider locale={preference.locale === 'zh' ? zhCN : enUS}>
+    <ConfigProvider locale={systemSettings.locale === 'zh' ? zhCN : enUS}>
       <ThemeProvider
-        themeMode={preference.theme}
+        themeMode={systemSettings.theme}
         theme={{
           components: {
             Layout: {
@@ -39,6 +42,7 @@ function App() {
         {/* 整个布局 */}
         <ProLayout
           title={t('app.title')}
+          className="h-screen w-screen"
           logo={
             <Avatar
               alt={t('app.title')}

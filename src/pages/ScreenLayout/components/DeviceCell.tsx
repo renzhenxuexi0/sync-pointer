@@ -5,6 +5,7 @@ export interface Device {
   hostname: string;
   ip: string;
   port: number;
+  serviceType: 'server' | 'client';
   position: {
     row: number;
     col: number;
@@ -59,17 +60,17 @@ function DeviceCell(device: Device) {
       {...attributes}
       {...listeners}
       style={style}
-      className="flex size-12 flex-col items-center justify-center"
+      className="flex size-12 flex-col items-center justify-center gap-2"
     >
       {device.status === 'online' ? (
         <Icon
           component={DeviceConnectSvg}
-          className="size-8"
+          className="sm:size-6 md:size-8"
         />
       ) : (
         <Icon
           component={DeviceDisconnectSvg}
-          className="size-8"
+          className="sm:size-6 md:size-8"
         />
       )}
       <span className="text-xs">{device.hostname}</span>
