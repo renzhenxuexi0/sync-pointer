@@ -1,4 +1,4 @@
-use tauri::Manager;
+use tauri::{AppHandle, Manager};
 
 pub mod api;
 pub mod config;
@@ -17,9 +17,16 @@ pub fn run() {
     let devtools = tauri_plugin_devtools::init();
 
     let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_persisted_scope::init())
+        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+            // 当重复打开应用时，激活已有窗口
+            show_window(app);
+        }))
         .setup(|app| {
             config::log::init(app.path().app_log_dir()?)?;
             core::handle::Handle::instance().init(app.handle());
@@ -35,4 +42,15 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn show_window(app: &AppHandle) {
+    let windows = app.webview_windows();
+
+    windows
+        .values()
+        .next()
+        .expect("Sorry, no window found")
+        .set_focus()
+        .expect("Can't Bring Window to Focus");
 }

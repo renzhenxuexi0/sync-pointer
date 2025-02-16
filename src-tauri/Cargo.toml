@@ -21,6 +21,10 @@ tauri-build = { version = "2", features = ["config-json5"] }
 tauri = { version = "2", features = ["tray-icon", "config-json5"] }
 # tauri plugin 开发工具
 tauri-plugin-devtools = "2"
+# tauri plugin 单例
+tauri-plugin-single-instance = "2"
+# tauri plugin 持久化作用域
+tauri-plugin-persisted-scope = "2"
 # tauri plugin 本地存储
 tauri-plugin-store = "2"
 # tauri plugin 文件系统
@@ -45,3 +49,7 @@ rust-i18n = "3"
 sys-locale = "0.3"
 hostname = "0.4.0"
 local-ip-address = "0.6.3"
+tauri-plugin-dialog = "2"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-window-state = "2"

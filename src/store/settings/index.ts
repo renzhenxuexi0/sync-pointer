@@ -22,8 +22,7 @@ const sys_hostname = await hostname();
 const settingsLocalStore = new LazyStore('settings.json');
 
 const settings = await settingsLocalStore.get<Settings>('preference');
-
-export const settingsStore = proxy<Settings>({
+const initSettings = {
   systemSettings: {
     locale:
       settings?.systemSettings?.locale === 'auto'
@@ -35,7 +34,11 @@ export const settingsStore = proxy<Settings>({
     hostname: settings?.serviceSettings?.hostname || sys_hostname || 'Sync-Pointer',
     serviceType: settings?.serviceSettings?.serviceType || 'client',
   },
-});
+} as Settings;
+// 初始化 store
+await settingsLocalStore.set('settings', initSettings);
+
+export const settingsStore = proxy<Settings>(initSettings);
 
 export function updateSystemSettings(systemSettings: Settings['systemSettings']) {
   const locale = systemSettings.locale;

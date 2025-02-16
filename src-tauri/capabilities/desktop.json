@@ -1,11 +1,16 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
-  "identifier": "main",
-  "description": "Main Window Capability",
+  "identifier": "desktop-capability",
+  "platforms": [
+    "macOS",
+    "windows",
+    "linux"
+  ],
   "windows": [
     "main"
   ],
   "permissions": [
+    "window-state:default",
     "core:default",
     "core:app:allow-default-window-icon",
     "core:app:allow-set-app-theme",
