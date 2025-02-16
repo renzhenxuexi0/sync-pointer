@@ -1,12 +1,12 @@
 import SettingsCard from '@/pages/settings/components/SettingsCard';
-import { preferenceStore, updateServiceSettings, updateSystemSettings } from '@/store/preference';
+import { settingsStore, updateServiceSettings, updateSystemSettings } from '@/store/settings';
 import { Col, Form, Input, Radio, Row } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
 
 function Settings() {
   const { t } = useTranslation();
-  const preference = useSnapshot(preferenceStore);
+  const preference = useSnapshot(settingsStore);
 
   return (
     <div className="h-[calc(100vh-60px)]">

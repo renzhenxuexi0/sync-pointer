@@ -1,32 +1,53 @@
-import { preferenceStore } from '@/store/preference';
+import { Device } from '@/store/devices';
+import { settingsStore } from '@/store/settings';
 import { DndContext, MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { Alert } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
-import { Device } from './components/DeviceCell';
-import DeviceGrid from './components/DeviceGrid';
+import { DeviceCellProps } from './components/DeviceCell';
+import DeviceGrid, { DeviceGridProps, GirdCell } from './components/DeviceGrid';
+
+function initCells(devices: Device[], hostname: string): (GirdCell | DeviceCellProps)[] {
+  return Array.from({ length: 25 }).map((_, index) => {
+    const device = devices.find((device) => device.id === index);
+    if (device) {
+      return {
+        ...device,
+        isMe: device.hostname === hostname,
+        status: 'online',
+      };
+    }
+    return {
+      id: index,
+      index,
+      isDropDisabled: false,
+    };
+  });
+}
 
 function ScreenLayout() {
   const { t } = useTranslation();
-  const preference = useSnapshot(preferenceStore);
+  const serviceSettings = useSnapshot(settingsStore.serviceSettings);
   const mouseSensor = useSensor(MouseSensor);
 
   const sensors = useSensors(mouseSensor);
 
-  const [devices, setDevices] = useState<Device[]>([
-    {
-      hostname: 'wuhy',
-      serviceType: 'server',
-      ip: '',
-      port: 0,
-      position: {
-        row: 2,
-        col: 2,
-      },
-      status: 'online',
-    },
-  ]);
+  const [deviceGridProps, setDeviceGridProps] = useState<DeviceGridProps>({
+    cells: initCells(
+      [
+        {
+          hostname: serviceSettings.hostname,
+          ip: '',
+          id: 12,
+          port: 0,
+          serviceType: 'server',
+        },
+      ],
+      serviceSettings.hostname,
+    ),
+    selectedDevice: undefined,
+  });
 
   return (
     <div
@@ -39,7 +60,7 @@ function ScreenLayout() {
         gap-4
       `}
     >
-      {preference.serviceSettings.serviceType === 'client' ? (
+      {serviceSettings.serviceType === 'client' ? (
         <Alert
           message={t('screen-layout.client-alert')}
           type="warning"
@@ -54,17 +75,25 @@ function ScreenLayout() {
         onDragEnd={(e) => {
           console.log(e);
           if (e.over?.id) {
-            const [row, col] = (e.over.id as string).split('-').map(Number);
-            const device = devices.find((device) => e.active.id === device.hostname);
-            if (device) {
-              device.position.row = row;
-              device.position.col = col;
-              setDevices([...devices]);
+            const index = e.over.id as number;
+            const deviceIndex = deviceGridProps.cells.find(
+              (device): device is DeviceCellProps =>
+                (device as DeviceCellProps).hostname === e.active.id,
+            )?.id;
+            if (deviceIndex) {
+              // 交换两个cell的位置
+              const cells = [...deviceGridProps.cells];
+              [cells[index], cells[deviceIndex]] = [cells[deviceIndex], cells[index]];
+
+              setDeviceGridProps({
+                ...deviceGridProps,
+                cells: cells,
+              });
             }
           }
         }}
       >
-        <DeviceGrid devices={devices}></DeviceGrid>
+        <DeviceGrid {...deviceGridProps}></DeviceGrid>
       </DndContext>
     </div>
   );

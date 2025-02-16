@@ -1,19 +1,29 @@
 import { useDroppable } from '@dnd-kit/core';
-import DeviceCell, { Device } from './DeviceCell';
+import DeviceCell, { DeviceCellProps } from './DeviceCell';
 
-interface DeviceGridProps {
-  devices: Device[];
+export interface GirdCell {
+  id: number;
+  isDropDisabled: boolean;
 }
 
-function gridCell(row: number, col: number, device: Device | undefined) {
-  const id = `${row}-${col}`;
-  const { setNodeRef, isOver } = useDroppable({
-    id,
+export interface DeviceGridProps {
+  cells: (GirdCell | DeviceCellProps)[];
+  selectedDevice?: DeviceCellProps;
+}
+
+function gridCell(cell: GirdCell | DeviceCellProps, isDropDisabled: boolean) {
+  const { setNodeRef } = useDroppable({
+    id: cell.id,
+    disabled: isDropDisabled,
   });
+  const isDeviceCellProps = () => {
+    return (cell as DeviceCellProps).hostname !== undefined;
+  };
+
   return (
     <div
-      key={id}
-      id={id}
+      key={cell.id}
+      id={cell.id.toString()}
       ref={setNodeRef}
       className={`
         flex
@@ -30,15 +40,22 @@ function gridCell(row: number, col: number, device: Device | undefined) {
         md:w-24
         sm:h-12
         sm:w-16
+        ${
+          isDropDisabled
+            ? `
+              cursor-not-allowed
+              opacity-50
+            `
+            : ''
+        }
       `}
     >
-      {device && <DeviceCell {...device} />}
-      {<span>{isOver}</span>}
+      {isDeviceCellProps() ? <DeviceCell {...(cell as DeviceCellProps)} /> : <span>{cell.id}</span>}
     </div>
   );
 }
 
-function DeviceGrid({ devices }: DeviceGridProps) {
+function DeviceGrid({ cells, selectedDevice }: DeviceGridProps) {
   return (
     <div
       className={`
@@ -46,13 +63,20 @@ function DeviceGrid({ devices }: DeviceGridProps) {
         grid-cols-5
       `}
     >
-      {Array.from({ length: 25 }).map((_, index) => {
-        const row = Math.floor(index / 5);
-        const col = index % 5;
-        const device = devices.find(
-          (device) => device.position.row === row && device.position.col === col,
-        );
-        return gridCell(row, col, device);
+      {cells.map((cell) => {
+        const row = Math.floor(cell.id / 5);
+        const col = cell.id % 5;
+        const selectedRow = selectedDevice ? Math.floor(selectedDevice.id / 5) : -1;
+        const selectedCol = selectedDevice ? selectedDevice.id % 5 : -1;
+
+        const isDropDisabled = !selectedDevice
+          ? false
+          : !(
+              (row === selectedRow && Math.abs(col - selectedCol) === 1) ||
+              (col === selectedCol && Math.abs(row - selectedRow) === 1)
+            );
+
+        return gridCell(cell, isDropDisabled);
       })}
     </div>
   );

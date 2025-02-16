@@ -1,20 +1,18 @@
 import { useDraggable } from '@dnd-kit/core';
 
-export interface Device {
+export interface DeviceCellProps {
+  id: number;
   hostname: string;
   ip: string;
   port: number;
   serviceType: 'server' | 'client';
-  position: {
-    row: number;
-    col: number;
-  };
+  isMe: boolean;
   status: 'online' | 'offline';
 }
 
-function DeviceCell(device: Device) {
+function DeviceCell(props: DeviceCellProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: device.hostname,
+    id: props.hostname,
   });
   const style = transform
     ? {
@@ -29,7 +27,6 @@ function DeviceCell(device: Device) {
       style={style}
       className={`
         flex
-        size-12
         flex-row
         items-center
         justify-center
@@ -42,10 +39,17 @@ function DeviceCell(device: Device) {
           h-2
           w-2
           rounded-full
-          ${device.status === 'online' ? 'bg-green-500' : 'bg-red-500'}
+          ${props.status === 'online' ? 'bg-green-500' : 'bg-red-500'}
         `}
       ></div>
-      <span className="text-xs">{device.hostname}</span>
+      <span
+        className={`
+          md:text-xs
+          sm:text-xs
+        `}
+      >
+        {props.hostname + (props.isMe ? '(you)' : '')}
+      </span>
     </div>
   );
 }

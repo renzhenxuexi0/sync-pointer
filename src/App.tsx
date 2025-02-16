@@ -11,11 +11,11 @@ import { useSnapshot } from 'valtio';
 import './App.css';
 import ScreenLayout from './pages/ScreenLayout';
 import Settings from './pages/settings';
-import { preferenceStore, updateSystemSettings } from './store/preference';
+import { settingsStore, updateSystemSettings } from './store/settings';
 
 function App() {
   const { t } = useTranslation();
-  const systemSettings = useSnapshot(preferenceStore.systemSettings);
+  const systemSettings = useSnapshot(settingsStore.systemSettings);
   const [pathname, setPathname] = useState<string>('/ScreenLayout');
   // 只运行一次初始化语言
   useEffect(() => {
