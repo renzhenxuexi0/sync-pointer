@@ -42,7 +42,7 @@ impl Mdns {
 
         let daemon = ServiceDaemon::new()?;
 
-        let (tx, rx) = watch::channel(false);
+        let (tx, mut rx) = watch::channel(false);
         self.shutdown_tx = Some(tx);
         let service_info = ServiceInfo::new(
             constant::MDNS_SERVICE_TYPE,
@@ -53,20 +53,13 @@ impl Mdns {
             HashMap::new(),
         )?;
 
-        // 每100ms扫描一次
         let task = tokio::spawn(async move {
-            let rx = rx;
             daemon
                 .register(service_info)
                 .expect("register mdns service failed");
-            loop {
-                if *rx.borrow() {
-                    break;
-                }
 
-                tokio::time::sleep(tokio::time::Duration::from_millis(1000))
-                    .await;
-            }
+            // 直接等待关闭信号
+            rx.changed().await.expect("shutdown signal error");
             daemon.shutdown().unwrap();
         });
 
@@ -82,7 +75,7 @@ impl Mdns {
         if let Some(task) = self.running_task.take() {
             task.await?;
         }
-        info!("mdns client stopped");
+        info!("mdns server stopped");
         Ok(())
     }
 }
