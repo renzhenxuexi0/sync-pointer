@@ -1,7 +1,7 @@
 use anyhow::Result;
 use mdns_sd::{ServiceDaemon, ServiceEvent};
 use parking_lot::RwLock;
-use spdlog::{debug, info};
+use spdlog::{debug, error, info};
 use std::{
     collections::HashMap,
     sync::{Arc, OnceLock},
@@ -12,8 +12,8 @@ use crate::{constant, service::Server};
 
 pub struct Mdns {
     pub servers: Arc<RwLock<HashMap<String, Server>>>,
-    running_task: Option<JoinHandle<()>>,
-    shutdown_tx: Option<watch::Sender<bool>>,
+    running_task: Arc<RwLock<Option<JoinHandle<()>>>>,
+    shutdown_tx: Arc<RwLock<Option<watch::Sender<bool>>>>,
 }
 
 impl Mdns {
@@ -21,14 +21,13 @@ impl Mdns {
         static MDNS: OnceLock<Mdns> = OnceLock::new();
         MDNS.get_or_init(|| Mdns {
             servers: Arc::new(RwLock::new(HashMap::new())),
-            running_task: None,
-            shutdown_tx: None,
+            running_task: Arc::new(RwLock::new(None)),
+            shutdown_tx: Arc::new(RwLock::new(None)),
         })
     }
 
-    pub async fn start(&mut self) -> Result<()> {
-        // 如果已经运行，先停止
-        if self.running_task.is_some() {
+    pub async fn start(&self) -> Result<()> {
+        if self.running_task.read().is_some() {
             self.stop().await?;
         }
 
@@ -36,103 +35,171 @@ impl Mdns {
 
         let receiver = daemon
             .browse(constant::MDNS_SERVICE_TYPE)
-            // TODO 异常处理优化
-            .expect("Failed to browse");
+            .map_err(|e| anyhow::anyhow!("Failed to browse: {}", e))?;
 
         let (tx, rx) = watch::channel(false);
-        self.shutdown_tx = Some(tx);
+        let mut shutdown_tx = self.shutdown_tx.write();
+        *shutdown_tx = Some(tx);
 
         let servers = Arc::clone(&self.servers);
-        // 每100ms扫描一次
         let task = tokio::spawn(async move {
             let rx = rx;
             let now = std::time::Instant::now();
-
+            info!("mdns client started");
             loop {
                 if *rx.borrow() {
+                    info!("Received shutdown signal");
                     break;
                 }
 
                 if let Ok(event) = receiver.try_recv() {
-                    match event {
-                        // 服务发现事件
-                        ServiceEvent::ServiceResolved(info) => {
-                            info!(
-                                "At {:?}: Resolved a new service: {}\n host: {}\n port: {}",
-                                now.elapsed(),
-                                info.get_fullname(),
-                                info.get_hostname(),
-                                info.get_port(),
-                            );
-                            for addr in info.get_addresses().iter() {
-                                info!(" Address: {}", addr);
-                            }
-                            for prop in info.get_properties().iter() {
-                                info!(" Property: {}", prop);
-                            }
-
-                            // 保存服务信息
-                            let fullname = info.get_fullname().to_string();
-                            let mut servers = servers.write();
-                            servers.insert(
-                                fullname,
-                                Server::new(
-                                    info.get_hostname().to_string(),
-                                    info.get_addresses().clone(),
-                                    info.get_port(),
-                                    info.get_properties().clone(),
-                                ),
-                            );
-                        }
-                        // 服务被移除事件
-                        ServiceEvent::ServiceRemoved(
-                            service_type,
-                            fullname,
-                        ) => {
-                            let mut servers = servers.write();
-                            servers.remove(&fullname);
-
-                            info!(
-                                "At {:?}: Removed a service: {} of type {}",
-                                now.elapsed(),
-                                fullname,
-                                service_type
-                            );
-                        }
-                        other_event => {
-                            debug!(
-                                "At {:?}: {:?}",
-                                now.elapsed(),
-                                &other_event
-                            );
-                        }
-                    }
+                    Self::handle_mdns_event(&servers, now.elapsed(), event);
                 }
                 tokio::time::sleep(tokio::time::Duration::from_millis(100))
                     .await;
             }
-            daemon.shutdown().unwrap();
+            if let Err(e) = daemon.shutdown() {
+                error!("Error shutting down mdns daemon: {}", e);
+            }
         });
 
-        self.running_task = Some(task);
+        let mut running_task = self.running_task.write();
+        *running_task = Some(task);
         Ok(())
     }
 
-    pub async fn stop(&mut self) -> Result<()> {
-        if let Some(tx) = self.shutdown_tx.take() {
-            let _ = tx.send(true);
+    pub async fn stop(&self) -> Result<()> {
+        let tx = {
+            let mut shutdown_tx = self.shutdown_tx.write();
+            shutdown_tx.take()
+        };
+
+        let task = {
+            let mut running_task = self.running_task.write();
+            running_task.take()
+        };
+
+        if let Some(tx) = tx {
+            tx.send(true).map_err(|e| {
+                anyhow::anyhow!("Failed to send shutdown signal: {}", e)
+            })?;
+            tx.closed().await;
         }
 
-        if let Some(task) = self.running_task.take() {
-            task.await?;
+        if let Some(task) = task {
+            task.await
+                .map_err(|e| anyhow::anyhow!("Task join error: {}", e))?;
         }
 
-        self.servers.write().clear();
+        {
+            self.servers.write().clear();
+        }
+        {
+            let mut shutdown_tx = self.shutdown_tx.write();
+            *shutdown_tx = None;
+        }
+        {
+            let mut running_task = self.running_task.write();
+            *running_task = None;
+        }
         info!("mdns client stopped");
         Ok(())
     }
 
     pub fn servers(&self) -> HashMap<String, Server> {
         self.servers.read().clone()
+    }
+
+    fn handle_mdns_event(
+        servers: &Arc<RwLock<HashMap<String, Server>>>,
+        elapsed: std::time::Duration,
+        event: ServiceEvent,
+    ) {
+        match event {
+            ServiceEvent::ServiceResolved(info) => {
+                let fullname = info.get_fullname().to_string();
+                let hostname = info.get_hostname().to_string();
+                let addresses = info.get_addresses();
+                let port = info.get_port();
+
+                if addresses.is_empty() {
+                    debug!(
+                        "At {:?}: Service {} resolved but no addresses found",
+                        elapsed, fullname
+                    );
+                    return;
+                }
+
+                info!(
+                    "At {:?}: Resolved service: {} (host: {}, port: {})",
+                    elapsed, fullname, hostname, port
+                );
+
+                for addr in addresses.iter() {
+                    debug!("Address: {}", addr);
+                }
+
+                for prop in info.get_properties().iter() {
+                    debug!("Property: {}", prop);
+                }
+
+                let mut servers = servers.write();
+                servers.insert(
+                    fullname.clone(),
+                    Server::new(
+                        hostname,
+                        addresses.clone(),
+                        port,
+                        info.get_properties().clone(),
+                    ),
+                );
+                info!("Service {} added to servers map", fullname);
+            }
+            ServiceEvent::ServiceRemoved(service_type, fullname) => {
+                let mut servers = servers.write();
+                if servers.remove(&fullname).is_some() {
+                    info!(
+                        "At {:?}: Removed service: {} of type {}",
+                        elapsed, fullname, service_type
+                    );
+                } else {
+                    debug!(
+                        "At {:?}: Attempted to remove non-existent service: {} of type {}",
+                        elapsed, fullname, service_type
+                    );
+                }
+            }
+            other_event => {
+                debug!("At {:?}: {:?}", elapsed, &other_event);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_mdns_singleton() {
+        let instance1 = Mdns::instance();
+        let instance2 = Mdns::instance();
+        assert!(std::ptr::eq(instance1, instance2));
+    }
+
+    #[tokio::test]
+    async fn test_start_stop() -> Result<()> {
+        let mdns = Mdns::instance();
+        mdns.start().await?;
+        assert!(mdns.running_task.read().is_some());
+        assert!(mdns.shutdown_tx.read().is_some());
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+        mdns.stop().await?;
+        assert!(mdns.running_task.read().is_none());
+        assert!(mdns.shutdown_tx.read().is_none());
+        assert!(mdns.servers.read().is_empty());
+
+        tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
+        Ok(())
     }
 }
