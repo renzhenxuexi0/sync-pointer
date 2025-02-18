@@ -13,6 +13,13 @@ export interface Settings {
     serviceType: 'server' | 'client';
     hostname: string;
   };
+  serverSettings: {
+    tcpPort: number;
+    mdnsPort: number;
+  };
+  clientSettings: {
+    connectServer: string;
+  };
 }
 
 // 获取系统语言
