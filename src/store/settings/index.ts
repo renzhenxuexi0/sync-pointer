@@ -26,7 +26,7 @@ export interface Settings {
 const sys_locale = (await locale())?.includes('zh') ? 'zh' : 'en';
 const sys_hostname = await hostname();
 // 本地 store
-const settingsLocalStore = new LazyStore('settings.json');
+const settingsLocalStore = new LazyStore('Settings.json');
 
 const settings = await settingsLocalStore.get<Settings>('preference');
 const initSettings = {

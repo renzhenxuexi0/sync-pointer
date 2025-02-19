@@ -10,7 +10,7 @@ import { NavLink, Route, Routes } from 'react-router';
 import { useSnapshot } from 'valtio';
 import './App.css';
 import ScreenLayout from './pages/ScreenLayout';
-import Settings from './pages/settings';
+import Settings from './pages/Settings';
 import { settingsStore, updateSystemSettings } from './store/settings';
 
 function App() {
@@ -68,7 +68,7 @@ function App() {
               },
               {
                 path: '/Settings',
-                name: t('menu.settings'),
+                name: t('menu.Settings'),
                 icon: <SettingOutlined className="!text-[#08c]" />,
               },
             ],

@@ -1,4 +1,4 @@
-import SettingsCard from '@/pages/settings/components/SettingsCard';
+import SettingsCard from './components/SettingsCard.tsx';
 import { settingsStore, updateServiceSettings, updateSystemSettings } from '@/store/settings';
 import { Col, Form, Input, Radio, Row } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -14,36 +14,36 @@ function Settings() {
         <Row gutter={[16, 16]}>
           <Col span={12}>
             <SettingsCard
-              title={t('settings.system-settings.label')}
+              title={t('Settings.system-Settings.label')}
               onFinish={(values) => {
                 updateSystemSettings(values);
               }}
               initialValues={preference.systemSettings}
             >
               <Form.Item
-                label={t('settings.system-settings.language.label')}
+                label={t('Settings.system-Settings.language.label')}
                 name="locale"
               >
                 <Radio.Group
                   block
                   options={[
-                    { label: t('settings.system-settings.language.zh'), value: 'zh' },
-                    { label: t('settings.system'), value: 'system' },
-                    { label: t('settings.system-settings.language.en'), value: 'en' },
+                    { label: t('Settings.system-Settings.language.zh'), value: 'zh' },
+                    { label: t('Settings.system'), value: 'system' },
+                    { label: t('Settings.system-Settings.language.en'), value: 'en' },
                   ]}
                   optionType="button"
                 />
               </Form.Item>
               <Form.Item
-                label={t('settings.system-settings.theme.label')}
+                label={t('Settings.system-Settings.theme.label')}
                 name="theme"
               >
                 <Radio.Group
                   block
                   options={[
-                    { label: t('settings.system-settings.theme.light'), value: 'light' },
-                    { label: t('settings.system'), value: 'system' },
-                    { label: t('settings.system-settings.theme.dark'), value: 'dark' },
+                    { label: t('Settings.system-Settings.theme.light'), value: 'light' },
+                    { label: t('Settings.system'), value: 'system' },
+                    { label: t('Settings.system-Settings.theme.dark'), value: 'dark' },
                   ]}
                   optionType="button"
                 />
@@ -52,25 +52,25 @@ function Settings() {
           </Col>
           <Col span={12}>
             <SettingsCard
-              title={t('settings.service-settings.label')}
+              title={t('Settings.service-Settings.label')}
               onFinish={(values) => {
                 updateServiceSettings(values);
               }}
               initialValues={preference.serviceSettings}
             >
               <Form.Item
-                label={t('settings.service-settings.service-type.label')}
+                label={t('Settings.service-Settings.service-type.label')}
                 name="serviceType"
               >
                 <Radio.Group
                   block
                   options={[
                     {
-                      label: t('settings.service-settings.service-type.server'),
+                      label: t('Settings.service-Settings.service-type.server'),
                       value: 'server',
                     },
                     {
-                      label: t('settings.service-settings.service-type.client'),
+                      label: t('Settings.service-Settings.service-type.client'),
                       value: 'client',
                     },
                   ]}
@@ -78,16 +78,16 @@ function Settings() {
                 />
               </Form.Item>
               <Form.Item
-                label={t('settings.service-settings.hostname.label')}
-                tooltip={t('settings.service-settings.hostname.tooltip')}
+                label={t('Settings.service-Settings.hostname.label')}
+                tooltip={t('Settings.service-Settings.hostname.tooltip')}
                 rules={[
                   {
                     pattern: /^[a-zA-Z0-9-]+$/,
-                    message: t('settings.service-settings.hostname.tooltip'),
+                    message: t('Settings.service-Settings.hostname.tooltip'),
                   },
                   {
                     max: 15,
-                    message: t('settings.service-settings.hostname.max'),
+                    message: t('Settings.service-Settings.hostname.max'),
                   },
                 ]}
                 name="hostname"
