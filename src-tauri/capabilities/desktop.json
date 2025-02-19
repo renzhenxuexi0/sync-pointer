@@ -19,6 +19,9 @@
     "store:default",
     "fs:default",
     "os:default",
-    "os:allow-hostname"
+    "os:allow-hostname",
+    "autostart:allow-enable",
+    "autostart:allow-disable",
+    "autostart:allow-is-enabled"
   ]
 }

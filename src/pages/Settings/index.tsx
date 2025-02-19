@@ -1,76 +1,100 @@
-import SettingsCard from './components/SettingsCard.tsx';
 import { settingsStore, updateServiceSettings, updateSystemSettings } from '@/store/settings';
-import { Col, Form, Input, Radio, Row } from 'antd';
+import { Col, Form, Input, Radio, Row, Spin, Switch } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
+import SettingsCard from './components/SettingsCard.tsx';
 
 function Settings() {
   const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
   const preference = useSnapshot(settingsStore);
 
   return (
     <div className="h-[calc(100vh-60px)]">
+      <Spin
+        spinning={loading}
+        fullscreen
+      />
       <Form.Provider>
         <Row gutter={[16, 16]}>
           <Col span={12}>
             <SettingsCard
-              title={t('Settings.system-Settings.label')}
-              onFinish={(values) => {
-                updateSystemSettings(values);
+              title={t('settings.system-settings.label')}
+              onFinish={async (values) => {
+                setLoading(true);
+                await updateSystemSettings(values)
+                  .catch((reason) => {
+                    console.log('Failed to update system settings' + reason);
+                  })
+                  .finally(() => {
+                    setLoading(false);
+                  });
               }}
               initialValues={preference.systemSettings}
             >
+              {/* 语言设置 */}
               <Form.Item
-                label={t('Settings.system-Settings.language.label')}
+                label={t('settings.system-settings.language.label')}
                 name="locale"
               >
                 <Radio.Group
                   block
                   options={[
-                    { label: t('Settings.system-Settings.language.zh'), value: 'zh' },
-                    { label: t('Settings.system'), value: 'system' },
-                    { label: t('Settings.system-Settings.language.en'), value: 'en' },
+                    { label: t('settings.system-settings.language.zh'), value: 'zh' },
+                    { label: t('settings.system'), value: 'auto' },
+                    { label: t('settings.system-settings.language.en'), value: 'en' },
                   ]}
                   optionType="button"
                 />
               </Form.Item>
+              {/* 主题设置 */}
               <Form.Item
-                label={t('Settings.system-Settings.theme.label')}
+                label={t('settings.system-settings.theme.label')}
                 name="theme"
               >
                 <Radio.Group
                   block
                   options={[
-                    { label: t('Settings.system-Settings.theme.light'), value: 'light' },
-                    { label: t('Settings.system'), value: 'system' },
-                    { label: t('Settings.system-Settings.theme.dark'), value: 'dark' },
+                    { label: t('settings.system-settings.theme.light'), value: 'light' },
+                    { label: t('settings.system'), value: 'auto' },
+                    { label: t('settings.system-settings.theme.dark'), value: 'dark' },
                   ]}
                   optionType="button"
                 />
+              </Form.Item>
+              {/* 自动启动 */}
+              <Form.Item
+                label={t('settings.system-settings.auto-start.label')}
+                name="autoStart"
+              >
+                <Switch size="default" />
               </Form.Item>
             </SettingsCard>
           </Col>
           <Col span={12}>
             <SettingsCard
-              title={t('Settings.service-Settings.label')}
+              title={t('settings.service-settings.label')}
               onFinish={(values) => {
+                setLoading(true);
                 updateServiceSettings(values);
+                setLoading(false);
               }}
               initialValues={preference.serviceSettings}
             >
               <Form.Item
-                label={t('Settings.service-Settings.service-type.label')}
+                label={t('settings.service-settings.service-type.label')}
                 name="serviceType"
               >
                 <Radio.Group
                   block
                   options={[
                     {
-                      label: t('Settings.service-Settings.service-type.server'),
+                      label: t('settings.service-settings.service-type.server'),
                       value: 'server',
                     },
                     {
-                      label: t('Settings.service-Settings.service-type.client'),
+                      label: t('settings.service-settings.service-type.client'),
                       value: 'client',
                     },
                   ]}
@@ -78,16 +102,16 @@ function Settings() {
                 />
               </Form.Item>
               <Form.Item
-                label={t('Settings.service-Settings.hostname.label')}
-                tooltip={t('Settings.service-Settings.hostname.tooltip')}
+                label={t('settings.service-settings.hostname.label')}
+                tooltip={t('settings.service-settings.hostname.tooltip')}
                 rules={[
                   {
                     pattern: /^[a-zA-Z0-9-]+$/,
-                    message: t('Settings.service-Settings.hostname.tooltip'),
+                    message: t('settings.service-settings.hostname.tooltip'),
                   },
                   {
                     max: 15,
-                    message: t('Settings.service-Settings.hostname.max'),
+                    message: t('settings.service-settings.hostname.max'),
                   },
                 ]}
                 name="hostname"

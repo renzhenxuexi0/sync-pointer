@@ -1,4 +1,5 @@
 use tauri::{AppHandle, Manager};
+use tauri_plugin_autostart::MacosLauncher;
 
 pub mod api;
 pub mod config;
@@ -17,6 +18,7 @@ pub fn run() {
     let devtools = tauri_plugin_devtools::init();
 
     let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
@@ -39,7 +41,13 @@ pub fn run() {
         builder = builder.plugin(devtools);
     }
     builder
-        .invoke_handler(tauri::generate_handler![])
+        .invoke_handler(tauri::generate_handler![
+            // mdns
+            api::mdns::start_mdns_server,
+            api::mdns::stop_mdns_server,
+            api::mdns::start_mdns_discovery,
+            api::mdns::stop_mdns_discovery,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

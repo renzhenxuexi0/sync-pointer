@@ -4,26 +4,19 @@ import { Avatar, ConfigProvider } from 'antd';
 import { ThemeProvider } from 'antd-style';
 import enUS from 'antd/lib/locale/en_US';
 import zhCN from 'antd/lib/locale/zh_CN';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Route, Routes } from 'react-router';
 import { useSnapshot } from 'valtio';
 import './App.css';
 import ScreenLayout from './pages/ScreenLayout';
 import Settings from './pages/Settings';
-import { settingsStore, updateSystemSettings } from './store/settings';
+import { settingsStore } from './store/settings';
 
 function App() {
   const { t } = useTranslation();
   const systemSettings = useSnapshot(settingsStore.systemSettings);
   const [pathname, setPathname] = useState<string>('/ScreenLayout');
-  // 只运行一次初始化语言
-  useEffect(() => {
-    updateSystemSettings({
-      locale: systemSettings.locale,
-      theme: systemSettings.theme,
-    });
-  }, []);
 
   return (
     <ConfigProvider locale={systemSettings.locale === 'zh' ? zhCN : enUS}>
@@ -68,7 +61,7 @@ function App() {
               },
               {
                 path: '/Settings',
-                name: t('menu.Settings'),
+                name: t('menu.settings'),
                 icon: <SettingOutlined className="!text-[#08c]" />,
               },
             ],

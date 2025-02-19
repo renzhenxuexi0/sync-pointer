@@ -1,5 +1,6 @@
 import i18n from '@/i18n';
 import { setTheme } from '@tauri-apps/api/app';
+import { disable, enable, isEnabled } from '@tauri-apps/plugin-autostart';
 import { hostname, locale } from '@tauri-apps/plugin-os';
 import { LazyStore } from '@tauri-apps/plugin-store';
 import { proxy, subscribe } from 'valtio';
@@ -8,6 +9,7 @@ export interface Settings {
   systemSettings: {
     theme: 'light' | 'dark' | 'auto';
     locale: 'zh' | 'en' | 'auto';
+    autoStart: boolean;
   };
   serviceSettings: {
     serviceType: 'server' | 'client';
@@ -26,9 +28,9 @@ export interface Settings {
 const sys_locale = (await locale())?.includes('zh') ? 'zh' : 'en';
 const sys_hostname = await hostname();
 // 本地 store
-const settingsLocalStore = new LazyStore('Settings.json');
+const settingsLocalStore = new LazyStore('settings.json');
+const settings = await settingsLocalStore.get<Settings>('settings');
 
-const settings = await settingsLocalStore.get<Settings>('preference');
 const initSettings = {
   systemSettings: {
     locale:
@@ -36,6 +38,7 @@ const initSettings = {
         ? sys_locale || 'zh'
         : settings?.systemSettings?.locale || 'auto',
     theme: settings?.systemSettings?.theme || 'light',
+    autoStart: settings?.systemSettings?.autoStart || false,
   },
   serviceSettings: {
     hostname: settings?.serviceSettings?.hostname || sys_hostname || 'Sync-Pointer',
@@ -47,34 +50,51 @@ await settingsLocalStore.set('settings', initSettings);
 
 export const settingsStore = proxy<Settings>(initSettings);
 
-export function updateSystemSettings(systemSettings: Settings['systemSettings']) {
+export async function updateSystemSettings(systemSettings: Partial<Settings['systemSettings']>) {
   const locale = systemSettings.locale;
   const theme = systemSettings.theme;
+  const autoStart = systemSettings.autoStart;
   if (locale) {
     settingsStore.systemSettings.locale = locale;
     if (locale !== 'auto') {
-      i18n.changeLanguage(locale);
+      await i18n.changeLanguage(locale);
       document.documentElement.lang = locale;
     } else {
-      i18n.changeLanguage(sys_locale);
+      await i18n.changeLanguage(sys_locale);
       document.documentElement.lang = sys_locale;
     }
   }
 
   if (theme) {
     settingsStore.systemSettings.theme = theme;
-    setTheme(theme === 'auto' ? undefined : theme);
+    await setTheme(theme === 'auto' ? undefined : theme);
+  }
+
+  if (autoStart !== undefined) {
+    settingsStore.systemSettings.autoStart = autoStart;
+    if (autoStart) {
+      await enable();
+    } else {
+      await isEnabled().then((enabled) => {
+        if (enabled) {
+          disable();
+        }
+      });
+    }
   }
 }
 
-export function updateServiceSettings(serviceSettings: Settings['serviceSettings']) {
-  if (serviceSettings.hostname === '') {
+export function updateServiceSettings(serviceSettings: Partial<Settings['serviceSettings']>) {
+  if (serviceSettings.hostname === '' || serviceSettings.hostname) {
     serviceSettings.hostname = sys_hostname || 'Sync-Pointer';
   }
-  settingsStore.serviceSettings = serviceSettings;
+  settingsStore.serviceSettings = {
+    ...settingsStore.serviceSettings,
+    ...serviceSettings,
+  };
 }
 
 // 订阅 store 变化，持久化到本地
-subscribe(settingsStore, () => {
-  settingsLocalStore.set('settings', settingsStore);
+subscribe(settingsStore, async () => {
+  await settingsLocalStore.set('settings', settingsStore);
 });

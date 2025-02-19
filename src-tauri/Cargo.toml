@@ -31,6 +31,13 @@ tauri-plugin-store = "2"
 tauri-plugin-fs = "2"
 # tauri plugin 系统信息
 tauri-plugin-os = "2"
+# tauri plugin 对话框
+tauri-plugin-dialog = "2"
+# tauri plugin 自动启动
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-autostart = "2"
+# tauri plugin 窗口状态
+tauri-plugin-window-state = "2"
 # 多线程相关
 tokio = { version = "1" }
 parking_lot = "0.12"
@@ -49,7 +56,3 @@ rust-i18n = "3"
 sys-locale = "0.3"
 hostname = "0.4.0"
 local-ip-address = "0.6.3"
-tauri-plugin-dialog = "2"
-
-[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-tauri-plugin-window-state = "2"

@@ -1,46 +1,53 @@
 {
   "app": {
-    "title": "Sync Pointer",
+    "close": "Close",
     "description": "Sync Pointer",
-    "loading": "Loading...",
     "error": "Error",
-    "retry": "Retry",
-    "quit": "Quit",
-    "minimize": "Minimize",
+    "loading": "Loading...",
     "maximize": "Maximize",
+    "minimize": "Minimize",
+    "quit": "Quit",
     "restore": "Restore",
-    "close": "Close"
+    "retry": "Retry",
+    "title": "Sync Pointer"
   },
   "menu": {
     "screen-layout": "Screen Layout",
     "settings": "Settings"
   },
+  "screen-layout": {
+    "client-alert": "Currently as a client, you can only view and not operate!"
+  },
   "settings": {
+    "service-settings": {
+      "hostname": {
+        "label": "Hostname",
+        "max": "The maximum length is 15 characters",
+        "tooltip": "Hostnames only support alphanumeric and '-' symbols"
+      },
+      "label": "Service Settings",
+      "service-type": {
+        "client": "Client",
+        "label": "Service Type",
+        "server": "Server"
+      }
+    },
     "system": "System",
     "system-settings": {
       "label": "System Settings",
       "language": {
+        "en": "English",
         "label": "Language",
-        "zh": "Chinese",
-        "en": "English"
+        "zh": "Chinese"
       },
       "theme": {
+        "dark": "Dark",
         "label": "Theme",
-        "light": "Light",
-        "dark": "Dark"
-      }
-    },
-    "service-settings": {
-      "label": "Service Settings",
-      "hostname": "Hostname",
-      "service-type": {
-        "label": "Service Type",
-        "server": "Server",
-        "client": "Client"
+        "light": "Light"
+      },
+      "auto-start": {
+        "label": "Start up"
       }
     }
-  },
-  "screen-layout": {
-    "client-alert": "Currently as a client, you can only view and not operate!"
   }
 }
