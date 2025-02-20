@@ -16,5 +16,6 @@
   "rust-analyzer.restartServerOnConfigChange": false,
   "rust-analyzer.imports.granularity.enforce": true,
   "rust-analyzer.check.command": "clippy",
-  "i18n-ally.keystyle": "nested"
+  "i18n-ally.keystyle": "nested",
+  "commentTranslate.source": "Google"
 }

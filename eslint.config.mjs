@@ -59,7 +59,10 @@ export default [
       ...eslintPluginReadableTailwind.configs.error.rules,
 
       // or configure rules individually
-      'readable-tailwind/multiline': ['error', { group: 'newLine', classesPerLine: 1 , lineBreakStyle: 'windows'}],
+      'readable-tailwind/multiline': [
+        'error',
+        { group: 'newLine', classesPerLine: 1, lineBreakStyle: 'windows' },
+      ],
     },
   },
   reactCompiler.configs.recommended,
@@ -70,5 +73,8 @@ export default [
       'react/jsx-uses-react': 'off', // 关闭旧模式校验
       'react/react-in-jsx-scope': 'off', // 关闭旧模式校验
     },
+  },
+  {
+    ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/out/**', 'vite.config.ts'],
   },
 ];
