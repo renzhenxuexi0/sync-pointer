@@ -43,6 +43,12 @@ pub fn run() {
     }
     builder
         .invoke_handler(tauri::generate_handler![
+            // log
+            api::log::trace,
+            api::log::debug,
+            api::log::info,
+            api::log::warn,
+            api::log::error,
             // mdns
             api::mdns::start_mdns_server,
             api::mdns::stop_mdns_server,

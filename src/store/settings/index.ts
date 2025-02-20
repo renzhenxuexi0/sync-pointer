@@ -88,10 +88,6 @@ export function updateServiceSettings(serviceSettings: Partial<Settings['service
   if (serviceSettings.hostname === '' || serviceSettings.hostname) {
     serviceSettings.hostname = sys_hostname || 'Sync-Pointer';
   }
-  settingsStore.serviceSettings = {
-    ...settingsStore.serviceSettings,
-    ...serviceSettings,
-  };
 }
 
 // 订阅 store 变化，持久化到本地

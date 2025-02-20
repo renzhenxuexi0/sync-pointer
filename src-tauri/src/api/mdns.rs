@@ -1,9 +1,9 @@
 use spdlog::error;
-use tauri::Runtime;
+use tauri::{command, Runtime};
 
 use crate::service::{client, server};
 
-#[tauri::command]
+#[command]
 pub async fn start_mdns_server<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
@@ -15,7 +15,7 @@ pub async fn start_mdns_server<R: Runtime>(
     Ok(())
 }
 
-#[tauri::command]
+#[command]
 pub async fn stop_mdns_server<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
@@ -27,7 +27,7 @@ pub async fn stop_mdns_server<R: Runtime>(
     Ok(())
 }
 
-#[tauri::command]
+#[command]
 pub async fn start_mdns_discovery<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
@@ -39,7 +39,7 @@ pub async fn start_mdns_discovery<R: Runtime>(
     Ok(())
 }
 
-#[tauri::command]
+#[command]
 pub async fn stop_mdns_discovery<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
