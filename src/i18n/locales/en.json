@@ -1,14 +1,6 @@
 {
   "app": {
-    "close": "Close",
     "description": "Sync Pointer",
-    "error": "Error",
-    "loading": "Loading...",
-    "maximize": "Maximize",
-    "minimize": "Minimize",
-    "quit": "Quit",
-    "restore": "Restore",
-    "retry": "Retry",
     "title": "Sync Pointer"
   },
   "menu": {
@@ -23,7 +15,7 @@
       "hostname": {
         "label": "Hostname",
         "max": "The maximum length is 15 characters",
-        "tooltip": "Hostnames only support alphanumeric and '-' symbols"
+        "tooltip": "Only alphanumeric and `-` symbols are supported for hostnames, and they cannot start or end with `-`."
       },
       "label": "Service Settings",
       "service-type": {

@@ -28,7 +28,7 @@ export default [
         sourceType: 'module',
       },
     },
-    settings: { react: { version: '19.0.0' } },
+    settings: { react: { version: '18.3.1s' } },
     ...reactHooks.configs['recommended-latest'],
   },
   {

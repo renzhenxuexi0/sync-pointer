@@ -1,17 +1,17 @@
 import { useDroppable } from '@dnd-kit/core';
 import DeviceCell, { DeviceCellProps } from './DeviceCell';
 
-export interface GirdCell {
+export interface GirdCellProps {
   id: number;
   isDropDisabled: boolean;
 }
 
 export interface DeviceGridProps {
-  cells: (GirdCell | DeviceCellProps)[];
+  cells: (GirdCellProps | DeviceCellProps)[];
   selectedDevice?: DeviceCellProps;
 }
 
-function gridCell(cell: GirdCell | DeviceCellProps, isDropDisabled: boolean) {
+function gridCell(cell: GirdCellProps | DeviceCellProps, isDropDisabled: boolean) {
   const { setNodeRef } = useDroppable({
     id: cell.id,
     disabled: isDropDisabled,

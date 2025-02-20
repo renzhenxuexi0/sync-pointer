@@ -1,19 +1,23 @@
 import { AppstoreOutlined, GithubFilled, SettingOutlined } from '@ant-design/icons';
 import { PageContainer, ProLayout } from '@ant-design/pro-components';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { Avatar, ConfigProvider } from 'antd';
 import { ThemeProvider } from 'antd-style';
 import enUS from 'antd/lib/locale/en_US';
 import zhCN from 'antd/lib/locale/zh_CN';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, NavLink, Route, Routes } from 'react-router';
 import { useSnapshot } from 'valtio';
 import './App.css';
 import ScreenLayout from './pages/screen-layout';
+import ServiceSettings from './pages/settings/service-settings';
 import SystemSettings from './pages/settings/system-settings';
 import { settingsStore } from './store/settings';
 
 function App() {
   const { t } = useTranslation();
+  const [location, setLocation] = useState('/');
   const systemSettings = useSnapshot(settingsStore.systemSettings);
 
   return (
@@ -66,18 +70,28 @@ function App() {
                     path: '/settings/system',
                     name: t('menu.system-settings'),
                   },
+                  {
+                    path: '/settings/service',
+                    name: t('menu.service-settings'),
+                  },
                 ],
               },
             ],
           }}
+          location={{ pathname: location }}
           actionsRender={() => {
-            return [<GithubFilled key="GithubFilled" />];
+            return [
+              <GithubFilled
+                key="GithubFilled"
+                onClick={async () => await openUrl('https://github.com/renzhenxuexi0/sync-pointer')}
+              />,
+            ];
           }}
           menuItemRender={(item, dom) => {
             return (
               <NavLink
                 to={item.path ?? '/screen-layout'}
-                onClick={() => item.path ?? '/screen-layout'}
+                onClick={() => setLocation(item.path ?? '/screen-layout')}
               >
                 {dom}
               </NavLink>
@@ -106,7 +120,11 @@ function App() {
                   <Route
                     path="system"
                     element={<SystemSettings />}
-                  ></Route>
+                  />
+                  <Route
+                    path="service"
+                    element={<ServiceSettings />}
+                  />
                 </Route>
               </Routes>
             }

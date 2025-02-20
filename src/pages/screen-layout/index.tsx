@@ -6,9 +6,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
 import { DeviceCellProps } from './components/DeviceCell';
-import DeviceGrid, { DeviceGridProps, GirdCell } from './components/DeviceGrid';
+import DeviceGrid, { DeviceGridProps, GirdCellProps } from './components/DeviceGrid';
 
-function initCells(devices: Device[], hostname: string): (GirdCell | DeviceCellProps)[] {
+function initCells(devices: Device[], hostname: string): (GirdCellProps | DeviceCellProps)[] {
   return Array.from({ length: 25 }).map((_, index) => {
     const device = devices.find((device) => device.id === index);
     if (device) {
@@ -64,37 +64,42 @@ function ScreenLayout() {
         <Alert
           message={t('screen-layout.client-alert')}
           type="warning"
-          className="h-8"
+          className={`h-6`}
           banner
         />
       ) : (
-        <div className="h-8" />
+        <div className={`h-6`} />
       )}
-      <DndContext
-        sensors={sensors}
-        onDragEnd={(e) => {
-          console.log(e);
-          if (e.over?.id) {
-            const index = e.over.id as number;
-            const deviceIndex = deviceGridProps.cells.find(
-              (device): device is DeviceCellProps =>
-                (device as DeviceCellProps).hostname === e.active.id,
-            )?.id;
-            if (deviceIndex) {
-              // 交换两个cell的位置
-              const cells = [...deviceGridProps.cells];
-              [cells[index], cells[deviceIndex]] = [cells[deviceIndex], cells[index]];
-
-              setDeviceGridProps({
-                ...deviceGridProps,
-                cells: cells,
-              });
+      <div className={`mt-10`}>
+        <DndContext
+          sensors={sensors}
+          onDragEnd={(e) => {
+            // console.log(e);
+            if (serviceSettings.serviceType === 'client') {
+              return;
             }
-          }
-        }}
-      >
-        <DeviceGrid {...deviceGridProps}></DeviceGrid>
-      </DndContext>
+            if (e.over?.id) {
+              const index = e.over.id as number;
+              const deviceIndex = deviceGridProps.cells.find(
+                (device): device is DeviceCellProps =>
+                  (device as DeviceCellProps).hostname === e.active.id,
+              )?.id;
+              if (deviceIndex) {
+                // 交换两个cell的位置
+                const cells = [...deviceGridProps.cells];
+                [cells[index], cells[deviceIndex]] = [cells[deviceIndex], cells[index]];
+
+                setDeviceGridProps({
+                  ...deviceGridProps,
+                  cells: cells,
+                });
+              }
+            }
+          }}
+        >
+          <DeviceGrid {...deviceGridProps}></DeviceGrid>
+        </DndContext>
+      </div>
     </div>
   );
 }
