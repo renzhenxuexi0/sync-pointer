@@ -4,19 +4,17 @@ import { Avatar, ConfigProvider } from 'antd';
 import { ThemeProvider } from 'antd-style';
 import enUS from 'antd/lib/locale/en_US';
 import zhCN from 'antd/lib/locale/zh_CN';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink, Route, Routes } from 'react-router';
+import { Navigate, NavLink, Route, Routes } from 'react-router';
 import { useSnapshot } from 'valtio';
 import './App.css';
-import ScreenLayout from './pages/ScreenLayout';
-import Settings from './pages/Settings';
+import ScreenLayout from './pages/screen-layout';
+import SystemSettings from './pages/settings/system-settings';
 import { settingsStore } from './store/settings';
 
 function App() {
   const { t } = useTranslation();
   const systemSettings = useSnapshot(settingsStore.systemSettings);
-  const [pathname, setPathname] = useState<string>('/ScreenLayout');
 
   return (
     <ConfigProvider locale={systemSettings.locale === 'zh' ? zhCN : enUS}>
@@ -55,19 +53,22 @@ function App() {
           route={{
             children: [
               {
-                path: '/ScreenLayout',
+                path: '/screen-layout',
                 name: t('menu.screen-layout'),
                 icon: <AppstoreOutlined className="!text-[#08c]" />,
               },
               {
-                path: '/Settings',
+                path: '/settings',
                 name: t('menu.settings'),
                 icon: <SettingOutlined className="!text-[#08c]" />,
+                children: [
+                  {
+                    path: '/settings/system',
+                    name: t('menu.system-settings'),
+                  },
+                ],
               },
             ],
-          }}
-          location={{
-            pathname: pathname,
           }}
           actionsRender={() => {
             return [<GithubFilled key="GithubFilled" />];
@@ -75,8 +76,8 @@ function App() {
           menuItemRender={(item, dom) => {
             return (
               <NavLink
-                to={item.path ?? '/ScreenLayout'}
-                onClick={() => setPathname(item.path ?? '/ScreenLayout')}
+                to={item.path ?? '/screen-layout'}
+                onClick={() => item.path ?? '/screen-layout'}
               >
                 {dom}
               </NavLink>
@@ -89,18 +90,31 @@ function App() {
             content={
               <Routes>
                 <Route
-                  path="ScreenLayout"
+                  path="/"
+                  element={
+                    <Navigate
+                      to="/screen-layout"
+                      replace
+                    />
+                  }
+                />
+                <Route
+                  path="screen-layout"
                   element={<ScreenLayout />}
                 ></Route>
-                <Route
-                  path="Settings"
-                  element={<Settings />}
-                ></Route>
+                <Route path="settings">
+                  <Route
+                    path="system"
+                    element={<SystemSettings />}
+                  ></Route>
+                </Route>
               </Routes>
             }
             header={{
               title: undefined,
+              breadcrumb: {},
             }}
+            ghost
           ></PageContainer>
         </ProLayout>
       </ThemeProvider>

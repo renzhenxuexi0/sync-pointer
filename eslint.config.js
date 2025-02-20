@@ -75,6 +75,6 @@ export default [
     },
   },
   {
-    ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/out/**', 'vite.config.ts'],
+    ignores: ['vite.config.ts'],
   },
 ];

@@ -13,7 +13,8 @@
   },
   "menu": {
     "screen-layout": "屏幕布局",
-    "settings": "设置"
+    "settings": "设置",
+    "system-settings": "系统设置"
   },
   "screen-layout": {
     "client-alert": "目前作为客户端, 只能查看不能操作!"
