@@ -10,7 +10,16 @@
     "service-settings": "服务配置"
   },
   "screen-layout": {
-    "client-alert": "目前作为客户端, 只能查看不能操作!"
+    "client-alert": "目前作为客户端, 只能查看不能操作!",
+    "device-cell": {
+      "hostname": "主机名",
+      "ip": "IP地址",
+      "port": "端口",
+      "service-type": "服务类型",
+      "is-me": "是否为本机",
+      "yes": "是",
+      "no": "否"
+    }
   },
   "settings": {
     "service-settings": {

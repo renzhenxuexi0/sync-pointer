@@ -1,29 +1,27 @@
+import { createPositionKey, Device, devicesStore, enableCellsStore } from '@/store/devices';
 import { useDroppable } from '@dnd-kit/core';
-import DeviceCell, { DeviceCellProps } from './DeviceCell';
+import { useSnapshot } from 'valtio';
+import DeviceCell from './DeviceCell';
 
-export interface GirdCellProps {
-  id: number;
-  isDropDisabled: boolean;
+export interface GirdCell {
+  row: number;
+  col: number;
+  disabled: boolean;
 }
 
-export interface DeviceGridProps {
-  cells: (GirdCellProps | DeviceCellProps)[];
-  selectedDevice?: DeviceCellProps;
-}
-
-function gridCell(cell: GirdCellProps | DeviceCellProps, isDropDisabled: boolean) {
+function gridCell(cell: GirdCell, device?: Device) {
+  const id = `${cell.row}-${cell.col}`;
   const { setNodeRef } = useDroppable({
-    id: cell.id,
-    disabled: isDropDisabled,
+    id,
+    disabled: cell.disabled,
   });
-  const isDeviceCellProps = () => {
-    return (cell as DeviceCellProps).hostname !== undefined;
-  };
+
+  const extendClassName = cell.disabled ? 'cursor-not-allowed opacity-50' : '';
 
   return (
     <div
-      key={cell.id}
-      id={cell.id.toString()}
+      key={id}
+      id={id}
       ref={setNodeRef}
       className={`
         flex
@@ -40,22 +38,17 @@ function gridCell(cell: GirdCellProps | DeviceCellProps, isDropDisabled: boolean
         md:w-24
         sm:h-12
         sm:w-16
-        ${
-          isDropDisabled
-            ? `
-              cursor-not-allowed
-              opacity-50
-            `
-            : ''
-        }
+        ${extendClassName}
       `}
     >
-      {isDeviceCellProps() ? <DeviceCell {...(cell as DeviceCellProps)} /> : <span>{cell.id}</span>}
+      {device ? <DeviceCell device={device} /> : <div></div>}
     </div>
   );
 }
 
-function DeviceGrid({ cells, selectedDevice }: DeviceGridProps) {
+function DeviceGrid() {
+  const devices = useSnapshot(devicesStore);
+  const enableCells = useSnapshot(enableCellsStore);
   return (
     <div
       className={`
@@ -63,20 +56,18 @@ function DeviceGrid({ cells, selectedDevice }: DeviceGridProps) {
         grid-cols-5
       `}
     >
-      {cells.map((cell) => {
-        const row = Math.floor(cell.id / 5);
-        const col = cell.id % 5;
-        const selectedRow = selectedDevice ? Math.floor(selectedDevice.id / 5) : -1;
-        const selectedCol = selectedDevice ? selectedDevice.id % 5 : -1;
-
-        const isDropDisabled = !selectedDevice
-          ? false
-          : !(
-              (row === selectedRow && Math.abs(col - selectedCol) === 1) ||
-              (col === selectedCol && Math.abs(row - selectedRow) === 1)
-            );
-
-        return gridCell(cell, isDropDisabled);
+      {Array.from({ length: 25 }).map((_, index) => {
+        const row = Math.floor(index / 5);
+        const col = index % 5;
+        const device = devices.get(createPositionKey(row, col));
+        return gridCell(
+          {
+            row,
+            col,
+            disabled: !enableCells.has(index),
+          },
+          device,
+        );
       })}
     </div>
   );

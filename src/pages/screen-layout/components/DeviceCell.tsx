@@ -1,18 +1,15 @@
+import Connected from '@/assets/icon/connected.svg?react';
+import Disconnected from '@/assets/icon/disconnected.svg?react';
+import { Device } from '@/store/devices';
 import { useDraggable } from '@dnd-kit/core';
+import { Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
 
-export interface DeviceCellProps {
-  id: number;
-  hostname: string;
-  ip: string;
-  port: number;
-  serviceType: 'server' | 'client';
-  isMe: boolean;
-  status: 'online' | 'offline';
-}
-
-function DeviceCell(props: DeviceCellProps) {
+function DeviceCell({ device }: { device: Device }) {
+  const id = `${device.row}-${device.col}`;
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: props.hostname,
+    id,
   });
   const style = transform
     ? {
@@ -20,37 +17,69 @@ function DeviceCell(props: DeviceCellProps) {
       }
     : undefined;
   return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={style}
-      className={`
-        flex
-        flex-row
-        items-center
-        justify-center
-        gap-2
-      `}
+    <Tooltip
+      placement="right"
+      trigger="hover"
+      title={
+        <div>
+          <div>
+            {t('screen-layout.device-cell.hostname')}: {device.hostname}
+          </div>
+          <div>
+            {t('screen-layout.device-cell.ip')}: {device.ip}
+          </div>
+          <div>
+            {t('screen-layout.device-cell.port')}: {device.port}
+          </div>
+          <div>
+            {t('screen-layout.device-cell.service-type')}: {device.serviceType}
+          </div>
+          <div>
+            {t('screen-layout.device-cell.is-me')}:{' '}
+            {device.isMe ? t('screen-layout.device-cell.yes') : t('screen-layout.device-cell.no')}
+          </div>
+          <div>row: {device.row}</div>
+          <div>col: {device.col}</div>
+        </div>
+      }
     >
-      {/* 红绿点 */}
       <div
+        ref={setNodeRef}
+        {...attributes}
+        {...listeners}
+        style={{
+          ...style,
+          position: 'relative',
+        }}
         className={`
-          h-2
-          w-2
-          rounded-full
-          ${props.status === 'online' ? 'bg-green-500' : 'bg-red-500'}
-        `}
-      ></div>
-      <span
-        className={`
-          md:text-xs
-          sm:text-xs
+          flex
+          flex-row
+          items-center
+          justify-center
+          gap-2
         `}
       >
-        {props.hostname + (props.isMe ? '(you)' : '')}
-      </span>
-    </div>
+        {device.status === 'online' ? (
+          <Connected
+            className={`
+              cursor-grab
+              lg:size-20
+              md:size-12
+              sm:size-10
+            `}
+          />
+        ) : (
+          <Disconnected
+            className={`
+              cursor-grab
+              lg:size-20
+              md:size-12
+              sm:size-10
+            `}
+          />
+        )}
+      </div>
+    </Tooltip>
   );
 }
 

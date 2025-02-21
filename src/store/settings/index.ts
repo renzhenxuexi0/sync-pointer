@@ -85,8 +85,15 @@ export async function updateSystemSettings(systemSettings: Partial<Settings['sys
 }
 
 export function updateServiceSettings(serviceSettings: Partial<Settings['serviceSettings']>) {
+  // 更新主机名
   if (serviceSettings.hostname === '' || serviceSettings.hostname) {
     serviceSettings.hostname = sys_hostname || 'Sync-Pointer';
+  }
+  settingsStore.serviceSettings.hostname = serviceSettings.hostname!;
+
+  // 更新服务类型
+  if (serviceSettings.serviceType) {
+    settingsStore.serviceSettings.serviceType = serviceSettings.serviceType;
   }
 }
 

@@ -8,7 +8,16 @@
     "settings": "Settings"
   },
   "screen-layout": {
-    "client-alert": "Currently as a client, you can only view and not operate!"
+    "client-alert": "Currently as a client, you can only view and not operate!",
+    "device-cell": {
+      "hostname": "Hostname",
+      "ip": "IP Address",
+      "port": "Port",
+      "service-type": "Service Type",
+      "is-me": "Is Me",
+      "yes": "Yes",
+      "no": "No"
+    }
   },
   "settings": {
     "service-settings": {
