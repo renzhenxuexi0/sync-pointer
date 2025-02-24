@@ -7,10 +7,10 @@ export const defaultNS = 'translation';
 export const ns = [defaultNS];
 
 const resources = {
-  enUS: {
+  'en-US': {
     [defaultNS]: enUS,
   },
-  zhCN: {
+  'zh-CN': {
     [defaultNS]: zhCN,
   },
 };

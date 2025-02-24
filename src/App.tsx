@@ -11,11 +11,11 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, NavLink, Route, Routes } from 'react-router';
 import { useSnapshot } from 'valtio';
 import './App.css';
-import { settingsStore } from './store/settings';
+import NetworkSettings from './pages/settings/network-settings';
+import { systemSettingsStore } from './store/settings/system';
 
 // 懒加载路由组件
 const ScreenLayout = lazy(() => import('@/pages/screen-layout'));
-const ServiceSettings = lazy(() => import('@/pages/settings/service-settings'));
 const SystemSettings = lazy(() => import('@/pages/settings/system-settings'));
 
 // 加载提示组件
@@ -28,7 +28,7 @@ const LoadingComponent = () => (
 function App() {
   const { t } = useTranslation();
   const [location, setLocation] = useState('/');
-  const systemSettings = useSnapshot(settingsStore.systemSettings);
+  const systemSettings = useSnapshot(systemSettingsStore);
 
   return (
     <ConfigProvider locale={systemSettings.locale === 'zh-CN' ? zhCN : enUS}>
@@ -81,8 +81,8 @@ function App() {
                     name: t('menu.system-settings'),
                   },
                   {
-                    path: '/settings/service',
-                    name: t('menu.service-settings'),
+                    path: '/settings/network',
+                    name: t('menu.network-settings'),
                   },
                 ],
               },
@@ -132,10 +132,7 @@ function App() {
                       path="system"
                       element={<SystemSettings />}
                     />
-                    <Route
-                      path="service"
-                      element={<ServiceSettings />}
-                    />
+                    <Route path='network' element={<NetworkSettings/>}/>
                   </Route>
                 </Routes>
               </Suspense>

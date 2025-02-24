@@ -1,5 +1,5 @@
 import { swapDevicePosition } from '@/store/devices';
-import { settingsStore } from '@/store/settings';
+import { networkSettingsStore } from '@/store/settings/network';
 import { DndContext, MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { Alert } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,7 @@ import DeviceGrid from './components/DeviceGrid';
 
 function ScreenLayout() {
   const { t } = useTranslation();
-  const serviceSettings = useSnapshot(settingsStore.serviceSettings);
+  const networkSettings = useSnapshot(networkSettingsStore);
   const mouseSensor = useSensor(MouseSensor);
 
   const sensors = useSensors(mouseSensor);
@@ -24,7 +24,7 @@ function ScreenLayout() {
         gap-4
       `}
     >
-      {serviceSettings.serviceType === 'client' ? (
+      {networkSettings.serviceType === 'client' ? (
         <Alert
           message={t('screen-layout.client-alert')}
           type="warning"
@@ -38,7 +38,7 @@ function ScreenLayout() {
         <DndContext
           sensors={sensors}
           onDragEnd={(e) => {
-            if (serviceSettings.serviceType === 'client') {
+            if (networkSettings.serviceType === 'client') {
               return;
             }
             if (e.over?.id) {

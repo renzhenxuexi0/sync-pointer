@@ -25,10 +25,10 @@ pub fn run() {
     });
 
     builder = builder
+        .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_window_state::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_os::init())
@@ -44,6 +44,8 @@ pub fn run() {
     }
     builder
         .invoke_handler(tauri::generate_handler![
+            // sys
+            api::sys::local_ip,
             // log
             api::log::trace,
             api::log::debug,

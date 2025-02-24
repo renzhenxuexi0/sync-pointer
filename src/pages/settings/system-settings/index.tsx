@@ -1,4 +1,4 @@
-import { settingsStore, updateSystemSettings } from '@/store/settings';
+import { systemSettingsStore, updateSystemSettings } from '@/store/settings/system';
 import { ProFormSelect, ProFormSwitch } from '@ant-design/pro-components';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
@@ -6,7 +6,7 @@ import SettingsForm from '../components/SettingsForm';
 
 function SystemSettings() {
   const { t } = useTranslation();
-  const systemSettings = useSnapshot(settingsStore.systemSettings);
+  const systemSettings = useSnapshot(systemSettingsStore);
   return (
     <SettingsForm
       initialValues={systemSettings}

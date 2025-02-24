@@ -1,7 +1,9 @@
-import { LazyStore } from '@tauri-apps/plugin-store';
 import { subscribe } from 'valtio';
 import { proxyMap, proxySet } from 'valtio/utils';
-import { settingsStore } from '../settings';
+import { devicesLocalStore } from '../settings';
+import { networkSettingsStore } from '../settings/network';
+
+const KEY = 'devices';
 
 interface Device {
   row: number;
@@ -22,33 +24,30 @@ const parsePositionKey = (key: string): [number, number] => {
   return [row, col];
 };
 
-// 本地 store
-const devicesLocalStore = new LazyStore('devices.json');
-
 // 初始状态
 const initialDevicesMap = new Map<string, Device>();
-const defaultDevice: Device = {
-  row: 2,
-  col: 2,
-  hostname: settingsStore.serviceSettings.hostname,
-  ip: '',
-  port: 0,
-  serviceType: 'server' as const,
-  isMe: true,
-  status: 'online',
-};
-initialDevicesMap.set(createPositionKey(defaultDevice.row, defaultDevice.col), defaultDevice);
 
 const devicesStore = proxyMap(initialDevicesMap);
 const enableCellsStore = proxySet(new Set<number>());
 
-async function initializeDevices() {
-  const devicesArray = await devicesLocalStore.get<Device[]>('devices');
-
-  if (devicesArray) {
-    devicesStore.clear();
-    devicesArray.forEach((device) => {
-      devicesStore.set(createPositionKey(device.row, device.col), device);
+async function initDevices() {
+  const devices = new Map(
+    Object.entries((await devicesLocalStore.get(KEY)) as Record<string, Device>),
+  );
+  if (devices === undefined || devices.size === 0) {
+    devicesStore.set(createPositionKey(2, 2), {
+      row: 2,
+      col: 2,
+      hostname: networkSettingsStore.hostname,
+      ip: networkSettingsStore.ip,
+      port: networkSettingsStore.serverPort,
+      serviceType: networkSettingsStore.serviceType,
+      isMe: true,
+      status: 'online',
+    });
+  } else {
+    devices.forEach((value, key) => {
+      devicesStore.set(key, value);
     });
   }
 
@@ -72,8 +71,6 @@ const initEnableCells = () => {
   });
 };
 
-initEnableCells();
-
 const swapDevicePosition = (fromKey: string, toKey: string) => {
   if (fromKey === toKey) return;
   const from = devicesStore.get(fromKey);
@@ -95,7 +92,7 @@ const swapDevicePosition = (fromKey: string, toKey: string) => {
 
 // 订阅 store 变化，持久化到本地
 subscribe(devicesStore, () => {
-  devicesLocalStore.set('devices', Array.from(devicesStore.values()));
+  devicesLocalStore.set(KEY, devicesStore);
   initEnableCells();
 });
 
@@ -103,10 +100,9 @@ export {
   createPositionKey,
   devicesStore,
   enableCellsStore,
-  initializeDevices,
+  initDevices,
   parsePositionKey,
   swapDevicePosition
 };
 export type { Device };
-
 

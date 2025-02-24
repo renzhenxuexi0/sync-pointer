@@ -29,7 +29,7 @@ function gridCell(cell: GirdCell, device?: Device) {
         justify-center
         border
         border-slate-200
-        bg-slate-100
+        bg-slate-300
         dark:border-slate-700
         dark:bg-slate-900
         lg:h-24
