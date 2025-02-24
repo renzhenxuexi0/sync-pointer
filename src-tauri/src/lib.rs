@@ -17,7 +17,14 @@ pub fn run() {
     #[cfg(debug_assertions)]
     let devtools = tauri_plugin_devtools::init();
 
-    let mut builder = tauri::Builder::default()
+    let mut builder = tauri::Builder::default().setup(|app| {
+        config::log::init(app.path().app_log_dir()?)?;
+        core::handle::Handle::instance().init(app.handle());
+        core::tray::Tray::instance().init()?;
+        Ok(())
+    });
+
+    builder = builder
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
         .plugin(tauri_plugin_dialog::init())
@@ -29,13 +36,7 @@ pub fn run() {
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
             // 当重复打开应用时，激活已有窗口
             show_window(app);
-        }))
-        .setup(|app| {
-            config::log::init(app.path().app_log_dir()?)?;
-            core::handle::Handle::instance().init(app.handle());
-            core::tray::Tray::instance().init()?;
-            Ok(())
-        });
+        }));
 
     #[cfg(debug_assertions)]
     {
@@ -50,10 +51,7 @@ pub fn run() {
             api::log::warn,
             api::log::error,
             // mdns
-            api::mdns::start_mdns_server,
-            api::mdns::stop_mdns_server,
-            api::mdns::start_mdns_discovery,
-            api::mdns::stop_mdns_discovery,
+            api::mdns::restart_mdns,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

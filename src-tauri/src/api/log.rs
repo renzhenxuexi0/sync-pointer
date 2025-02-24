@@ -1,7 +1,7 @@
 use tauri::{command, Runtime};
 
 #[command]
-pub async fn trace<R: Runtime>(
+pub fn trace<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     message: String,
@@ -10,7 +10,7 @@ pub async fn trace<R: Runtime>(
 }
 
 #[command]
-pub async fn debug<R: Runtime>(
+pub fn debug<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     message: String,
@@ -19,7 +19,7 @@ pub async fn debug<R: Runtime>(
 }
 
 #[command]
-pub async fn info<R: Runtime>(
+pub fn info<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     message: String,
@@ -28,7 +28,7 @@ pub async fn info<R: Runtime>(
 }
 
 #[command]
-pub async fn warn<R: Runtime>(
+pub fn warn<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     message: String,
@@ -37,7 +37,7 @@ pub async fn warn<R: Runtime>(
 }
 
 #[command]
-pub async fn error<R: Runtime>(
+pub fn error<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     message: String,

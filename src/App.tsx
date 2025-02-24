@@ -1,19 +1,29 @@
+import logo from '@/assets/logo.png';
 import { AppstoreOutlined, GithubFilled, SettingOutlined } from '@ant-design/icons';
 import { PageContainer, ProLayout } from '@ant-design/pro-components';
 import { openUrl } from '@tauri-apps/plugin-opener';
-import { Avatar, ConfigProvider } from 'antd';
+import { Avatar, ConfigProvider, Spin } from 'antd';
 import { ThemeProvider } from 'antd-style';
 import enUS from 'antd/lib/locale/en_US';
 import zhCN from 'antd/lib/locale/zh_CN';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, NavLink, Route, Routes } from 'react-router';
 import { useSnapshot } from 'valtio';
 import './App.css';
-import ScreenLayout from './pages/screen-layout';
-import ServiceSettings from './pages/settings/service-settings';
-import SystemSettings from './pages/settings/system-settings';
 import { settingsStore } from './store/settings';
+
+// 懒加载路由组件
+const ScreenLayout = lazy(() => import('@/pages/screen-layout'));
+const ServiceSettings = lazy(() => import('@/pages/settings/service-settings'));
+const SystemSettings = lazy(() => import('@/pages/settings/system-settings'));
+
+// 加载提示组件
+const LoadingComponent = () => (
+  <div className="flex h-full w-full items-center justify-center">
+    <Spin size="large" />
+  </div>
+);
 
 function App() {
   const { t } = useTranslation();
@@ -48,7 +58,7 @@ function App() {
               size="large"
               src={
                 <img
-                  src={'icon.png'}
+                  src={logo}
                   alt="avatar"
                 />
               }
@@ -102,31 +112,33 @@ function App() {
           {/* 内容区 */}
           <PageContainer
             content={
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <Navigate
-                      to="/screen-layout"
-                      replace
+              <Suspense fallback={<LoadingComponent />}>
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <Navigate
+                        to="/screen-layout"
+                        replace
+                      />
+                    }
+                  />
+                  <Route
+                    path="screen-layout"
+                    element={<ScreenLayout />}
+                  ></Route>
+                  <Route path="settings">
+                    <Route
+                      path="system"
+                      element={<SystemSettings />}
                     />
-                  }
-                />
-                <Route
-                  path="screen-layout"
-                  element={<ScreenLayout />}
-                ></Route>
-                <Route path="settings">
-                  <Route
-                    path="system"
-                    element={<SystemSettings />}
-                  />
-                  <Route
-                    path="service"
-                    element={<ServiceSettings />}
-                  />
-                </Route>
-              </Routes>
+                    <Route
+                      path="service"
+                      element={<ServiceSettings />}
+                    />
+                  </Route>
+                </Routes>
+              </Suspense>
             }
             header={{
               title: undefined,

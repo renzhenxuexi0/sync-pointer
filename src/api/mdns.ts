@@ -1,17 +1,11 @@
 import { invoke } from '@tauri-apps/api/core';
 
-export async function startMdnsServer(): Promise<void> {
-  await invoke<void>('start_mdns_server');
+export interface MdnsRestartOptions {
+  mode: 'server' | 'client';
+  host?: string;
+  port?: number;
 }
 
-export async function stopMdnsServer(): Promise<void> {
-  await invoke<void>('stop_mdns_server');
-}
-
-export async function startMdnsDiscovery(): Promise<void> {
-  await invoke<void>('start_mdns_discovery');
-}
-
-export async function stopMdnsDiscovery(): Promise<void> {
-  await invoke<void>('stop_mdns_discovery');
+export async function restartMdns(options: MdnsRestartOptions): Promise<void> {
+  return invoke<void>('restart_mdns', { ...options });
 }

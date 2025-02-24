@@ -1,5 +1,3 @@
-import { Settings } from '@/store/settings';
-import { LazyStore } from '@tauri-apps/plugin-store';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
@@ -7,10 +5,6 @@ import zh from './locales/zh.json';
 
 export const defaultNS = 'translation';
 export const ns = [defaultNS];
-
-// 本地 store
-const settingsLocalStore = new LazyStore('settings.json');
-const settings = await settingsLocalStore.get<Settings>('settings');
 
 const resources = {
   en: {
@@ -21,17 +15,16 @@ const resources = {
   },
 };
 
-i18n
-  .use(initReactI18next) // passes i18n down to react-i18next
-  .init({
-    resources,
-    lng: settings?.systemSettings.locale,
-    defaultNS,
-    ns,
-    fallbackLng: 'zh',
-    interpolation: {
-      escapeValue: false, // react already safes from xss
-    },
-  });
+// 初始化一个基础的 i18n 实例，后续会通过 initializeI18n 更新配置
+i18n.use(initReactI18next).init({
+  resources,
+  lng: 'zh',
+  defaultNS,
+  ns,
+  fallbackLng: 'zh',
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 export default i18n;

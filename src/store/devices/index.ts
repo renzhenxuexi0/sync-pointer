@@ -3,7 +3,7 @@ import { subscribe } from 'valtio';
 import { proxyMap, proxySet } from 'valtio/utils';
 import { settingsStore } from '../settings';
 
-export interface Device {
+interface Device {
   row: number;
   col: number;
   hostname: string;
@@ -15,9 +15,9 @@ export interface Device {
 }
 
 // 生成位置key
-export const createPositionKey = (row: number, col: number) => `${row}-${col}`;
+const createPositionKey = (row: number, col: number) => `${row}-${col}`;
 // 解析位置key
-export const parsePositionKey = (key: string): [number, number] => {
+const parsePositionKey = (key: string): [number, number] => {
   const [row, col] = key.split('-').map(Number);
   return [row, col];
 };
@@ -25,29 +25,36 @@ export const parsePositionKey = (key: string): [number, number] => {
 // 本地 store
 const devicesLocalStore = new LazyStore('devices.json');
 
-const devicesArray = await devicesLocalStore.get<Device[]>('devices');
-const devicesMap = new Map<string, Device>();
+// 初始状态
+const initialDevicesMap = new Map<string, Device>();
+const defaultDevice: Device = {
+  row: 2,
+  col: 2,
+  hostname: settingsStore.serviceSettings.hostname,
+  ip: '',
+  port: 0,
+  serviceType: 'server' as const,
+  isMe: true,
+  status: 'online',
+};
+initialDevicesMap.set(createPositionKey(defaultDevice.row, defaultDevice.col), defaultDevice);
 
-if (devicesArray) {
-  devicesArray.forEach((device) => {
-    devicesMap.set(createPositionKey(device.row, device.col), device);
-  });
-} else {
-  const defaultDevice: Device = {
-    row: 2,
-    col: 2,
-    hostname: settingsStore.serviceSettings.hostname,
-    ip: '',
-    port: 0,
-    serviceType: 'server' as const,
-    isMe: true,
-    status: 'online',
-  };
-  devicesMap.set(createPositionKey(defaultDevice.row, defaultDevice.col), defaultDevice);
+const devicesStore = proxyMap(initialDevicesMap);
+const enableCellsStore = proxySet(new Set<number>());
+
+async function initializeDevices() {
+  const devicesArray = await devicesLocalStore.get<Device[]>('devices');
+
+  if (devicesArray) {
+    devicesStore.clear();
+    devicesArray.forEach((device) => {
+      devicesStore.set(createPositionKey(device.row, device.col), device);
+    });
+  }
+
+  initEnableCells();
 }
 
-export const devicesStore = proxyMap(devicesMap);
-export const enableCellsStore = proxySet(new Set<number>());
 const initEnableCells = () => {
   enableCellsStore.clear();
   devicesStore.forEach((device) => {
@@ -64,9 +71,10 @@ const initEnableCells = () => {
     if (col < 4) enableCellsStore.add(row * 5 + col + 1);
   });
 };
+
 initEnableCells();
 
-export const swapDevicePosition = (fromKey: string, toKey: string) => {
+const swapDevicePosition = (fromKey: string, toKey: string) => {
   if (fromKey === toKey) return;
   const from = devicesStore.get(fromKey);
   const to = devicesStore.get(toKey);
@@ -85,7 +93,18 @@ export const swapDevicePosition = (fromKey: string, toKey: string) => {
   }
 };
 
+// 订阅 store 变化，持久化到本地
 subscribe(devicesStore, () => {
   devicesLocalStore.set('devices', Array.from(devicesStore.values()));
   initEnableCells();
 });
+
+export {
+  createPositionKey,
+  devicesStore,
+  enableCellsStore,
+  initializeDevices,
+  parsePositionKey,
+  swapDevicePosition,
+};
+export type { Device };

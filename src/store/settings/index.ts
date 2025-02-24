@@ -1,3 +1,4 @@
+import { restartMdns } from '@/api/mdns';
 import i18n from '@/i18n';
 import { setTheme } from '@tauri-apps/api/app';
 import { disable, enable, isEnabled } from '@tauri-apps/plugin-autostart';
@@ -24,76 +25,135 @@ export interface Settings {
   };
 }
 
-// 获取系统语言
-const sys_locale = (await locale())?.includes('zh') ? 'zh' : 'en';
-const sys_hostname = await hostname();
-// 本地 store
+// 本地存储
 const settingsLocalStore = new LazyStore('settings.json');
-const settings = await settingsLocalStore.get<Settings>('settings');
-
-const initSettings = {
+//
+const settingsStore = proxy<Settings>({
   systemSettings: {
-    locale:
-      settings?.systemSettings?.locale === 'auto'
-        ? sys_locale || 'zh'
-        : settings?.systemSettings?.locale || 'auto',
-    theme: settings?.systemSettings?.theme || 'light',
-    autoStart: settings?.systemSettings?.autoStart || false,
+    locale: 'auto',
+    theme: 'light',
+    autoStart: false,
   },
   serviceSettings: {
-    hostname: settings?.serviceSettings?.hostname || sys_hostname || 'Sync-Pointer',
-    serviceType: settings?.serviceSettings?.serviceType || 'client',
+    hostname: 'Sync-Pointer',
+    serviceType: 'client',
   },
-} as Settings;
-// 初始化 store
-await settingsLocalStore.set('settings', initSettings);
+  serverSettings: {
+    tcpPort: 0,
+    mdnsPort: 0,
+  },
+  clientSettings: {
+    connectServer: '',
+  },
+});
 
-export const settingsStore = proxy<Settings>(initSettings);
+async function detectSystemLocale(): Promise<'zh' | 'en'> {
+  try {
+    const localeStr = (await locale()) || '';
+    return String(localeStr).toLowerCase().includes('zh') ? 'zh' : 'en';
+  } catch (error) {
+    console.error('Failed to detect system locale:', error);
+    return 'en';
+  }
+}
 
-export async function updateSystemSettings(systemSettings: Partial<Settings['systemSettings']>) {
+async function initializeSettings() {
+  const sys_locale = await detectSystemLocale();
+  const sys_hostname = await hostname();
+  const settings = await settingsLocalStore.get<Settings>('settings');
+
+  const initSettings = {
+    systemSettings: {
+      locale:
+        settings?.systemSettings?.locale === 'auto'
+          ? sys_locale
+          : settings?.systemSettings?.locale || 'auto',
+      theme: settings?.systemSettings?.theme || 'light',
+      autoStart: settings?.systemSettings?.autoStart || false,
+    },
+    serviceSettings: {
+      hostname: settings?.serviceSettings?.hostname || sys_hostname || 'Sync-Pointer',
+      serviceType: settings?.serviceSettings?.serviceType || 'client',
+    },
+    serverSettings: settings?.serverSettings || {
+      tcpPort: 0,
+      mdnsPort: 0,
+    },
+    clientSettings: settings?.clientSettings || {
+      connectServer: '',
+    },
+  } as Settings;
+
+  Object.assign(settingsStore, initSettings);
+  i18n.changeLanguage(initSettings.systemSettings.locale);
+  await settingsLocalStore.set('settings', initSettings);
+  await restartMdns({
+    mode: initSettings.serviceSettings.serviceType,
+    host: initSettings.serviceSettings.hostname,
+  });
+
+  return sys_locale;
+}
+
+async function updateSystemSettings(systemSettings: Partial<Settings['systemSettings']>) {
   const locale = systemSettings.locale;
   const theme = systemSettings.theme;
   const autoStart = systemSettings.autoStart;
-  if (locale) {
+  console.log(systemSettings);
+  if (locale && locale !== settingsStore.systemSettings.locale) {
     settingsStore.systemSettings.locale = locale;
     if (locale !== 'auto') {
       await i18n.changeLanguage(locale);
       document.documentElement.lang = locale;
     } else {
+      const sys_locale = await detectSystemLocale();
       await i18n.changeLanguage(sys_locale);
       document.documentElement.lang = sys_locale;
     }
   }
 
-  if (theme) {
+  if (theme && theme !== settingsStore.systemSettings.theme) {
     settingsStore.systemSettings.theme = theme;
     await setTheme(theme === 'auto' ? undefined : theme);
   }
 
-  if (autoStart !== undefined) {
+  if (autoStart !== undefined && autoStart !== settingsStore.systemSettings.autoStart) {
     settingsStore.systemSettings.autoStart = autoStart;
     if (autoStart) {
       await enable();
     } else {
-      await isEnabled().then((enabled) => {
+      await isEnabled().then(async (enabled) => {
         if (enabled) {
-          disable();
+          await disable();
         }
       });
     }
   }
 }
 
-export function updateServiceSettings(serviceSettings: Partial<Settings['serviceSettings']>) {
-  // 更新主机名
-  if (serviceSettings.hostname === '' || serviceSettings.hostname) {
-    serviceSettings.hostname = sys_hostname || 'Sync-Pointer';
+async function updateServiceSettings(serviceSettings: Partial<Settings['serviceSettings']>) {
+  console.log(serviceSettings);
+  if (
+    serviceSettings.hostname &&
+    serviceSettings.hostname !== settingsStore.serviceSettings.hostname
+  ) {
+    settingsStore.serviceSettings.hostname = serviceSettings.hostname;
   }
-  settingsStore.serviceSettings.hostname = serviceSettings.hostname!;
 
-  // 更新服务类型
-  if (serviceSettings.serviceType) {
-    settingsStore.serviceSettings.serviceType = serviceSettings.serviceType;
+  if (
+    serviceSettings.serviceType &&
+    serviceSettings.serviceType !== settingsStore.serviceSettings.serviceType
+  ) {
+    await restartMdns({
+      mode: serviceSettings.serviceType,
+      host: settingsStore.serviceSettings.hostname,
+    })
+      .then(() => {
+        settingsStore.serviceSettings.serviceType = serviceSettings.serviceType!;
+      })
+      .catch((e) => {
+        console.error(e);
+      });
   }
 }
 
@@ -101,3 +161,6 @@ export function updateServiceSettings(serviceSettings: Partial<Settings['service
 subscribe(settingsStore, async () => {
   await settingsLocalStore.set('settings', settingsStore);
 });
+
+export { initializeSettings, settingsStore, updateServiceSettings, updateSystemSettings };
+

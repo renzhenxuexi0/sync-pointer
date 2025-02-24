@@ -1,7 +1,7 @@
 use anyhow::Result;
 use mdns_sd::{ServiceDaemon, ServiceInfo};
 use parking_lot::RwLock;
-use spdlog::info;
+use spdlog::{debug, info};
 use std::{
     collections::HashMap,
     sync::{Arc, OnceLock},
@@ -59,23 +59,28 @@ impl Mdns {
         let (tx, mut rx) = watch::channel(false);
         let mut shutdown_tx = self.shutdown_tx.write();
         *shutdown_tx = Some(tx);
+        let host_name = self.host() + ".local.";
         let service_info = ServiceInfo::new(
             constant::MDNS_SERVICE_TYPE,
             constant::MDNS_SERVER_NAME,
-            &self.host(),
+            &host_name,
             "",
             self.port(),
             HashMap::new(),
         )?;
 
         let task = tokio::spawn(async move {
-            daemon
-                .register(service_info)
-                .expect("register mdns service failed");
-
+            if let Err(e) = daemon.register(service_info) {
+                info!("Failed to register mdns service: {}", e);
+                return;
+            }
+            info!("mdns server started");
             // 直接等待关闭信号
-            rx.changed().await.expect("shutdown signal error");
-            daemon.shutdown().unwrap();
+            if rx.changed().await.is_ok() {
+                if let Err(e) = daemon.shutdown() {
+                    info!("Failed to shutdown mdns daemon: {}", e);
+                }
+            }
         });
 
         let mut running_task = self.running_task.write();
@@ -84,6 +89,10 @@ impl Mdns {
     }
 
     pub async fn stop(&self) -> Result<()> {
+        if self.running_task.read().is_none() {
+            debug!("mdns server not running");
+            return Ok(());
+        }
         let tx = {
             let mut shutdown_tx = self.shutdown_tx.write();
             shutdown_tx.take()

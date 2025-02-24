@@ -10,8 +10,11 @@ function ServiceSettings() {
   return (
     <SettingsForm
       initialValues={serviceSettings}
-      onFinish={async (values) => {
-        updateServiceSettings(values);
+      onFinish={async (values, form) => {
+        await updateServiceSettings(values);
+        if (form) {
+          form.setFieldsValue(serviceSettings);
+        }
       }}
     >
       <ProFormText
@@ -23,6 +26,10 @@ function ServiceSettings() {
           {
             max: 15,
             message: t('settings.service-settings.hostname.max'),
+          },
+          {
+            required: true,
+            message: t('settings.service-settings.hostname.required'),
           },
           {
             pattern: /^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/,

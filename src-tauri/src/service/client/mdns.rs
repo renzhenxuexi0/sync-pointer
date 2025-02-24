@@ -69,6 +69,10 @@ impl Mdns {
     }
 
     pub async fn stop(&self) -> Result<()> {
+        if self.running_task.read().is_none() {
+            debug!("mdns client not running");
+            return Ok(());
+        }
         let tx = {
             let mut shutdown_tx = self.shutdown_tx.write();
             shutdown_tx.take()

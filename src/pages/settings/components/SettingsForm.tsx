@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 export interface SettingsFormProps<T extends Record<string, unknown> | undefined> {
   initialValues: T;
-  onFinish: (values: T) => Promise<void>;
+  onFinish: (values: T, form?: ProFormInstance) => Promise<void>;
   children?: React.ReactNode;
 }
 
@@ -16,10 +16,11 @@ function SettingsForm<T extends Record<string, unknown> | undefined>(props: Sett
   const [isChange, setIsChange] = useState(false);
   return (
     <div>
-      {/* <Context.Provider value={{ name: 'Ant Design' }}> */}
       {contextHolder}
       <ProForm
         formRef={formRef}
+        requiredMark={false}
+        request={async () => props.initialValues}
         submitter={{
           render: (_, dom) => <FooterToolbar>{dom}</FooterToolbar>,
           searchConfig: {
@@ -32,6 +33,10 @@ function SettingsForm<T extends Record<string, unknown> | undefined>(props: Sett
           resetButtonProps: {
             disabled: !isChange,
           },
+          onReset: () => {
+            formRef.current?.setFieldsValue(props.initialValues);
+            setIsChange(false);
+          },
         }}
         onValuesChange={() => {
           if (!isChange) {
@@ -40,18 +45,14 @@ function SettingsForm<T extends Record<string, unknown> | undefined>(props: Sett
         }}
         layout="horizontal"
         colon={false}
-        onReset={() => {
-          setIsChange(false);
-        }}
         onFinish={async (values: T) => {
-          await props.onFinish(values);
+          await props.onFinish(values, formRef.current);
           api.success({
             message: t('settings.form.save-success'),
             duration: 1,
           });
           setIsChange(false);
         }}
-        initialValues={props.initialValues}
       >
         {props.children}
       </ProForm>
