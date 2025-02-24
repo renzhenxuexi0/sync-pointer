@@ -1,0 +1,129 @@
+# Sync-Pointer 项目规范
+
+## 项目概述
+
+局域网共享键鼠软件(类似KVM)，让多台电脑共享一套键盘鼠标。
+
+## 技术栈
+
+### 前端
+
+- React 18 + TypeScript
+- Vite
+- Tauri v2
+- Ant Design
+- Bun
+- i18n
+- Tailwind CSS
+
+### 后端
+
+- Rust
+- Tauri v2 API
+- MDNS
+- 日志系统
+
+## 核心功能
+
+### 设备管理
+
+- 局域网设备发现
+- 设备连接管理
+- 设备配置
+
+### 屏幕布局
+
+- 显示器布局配置
+- 设备位置关系
+- 边界行为设置
+
+### 系统设置
+
+- 服务端/客户端配置
+- 网络设置
+- 性能选项
+
+### 通信
+
+- 键鼠事件转发
+- 剪贴板同步
+- 状态同步
+
+## 项目结构
+
+```
+src/
+├── api/       # API接口
+├── assets/    # 资源
+├── i18n/      # 国际化
+├── pages/     # 页面
+├── store/     # 状态
+└── components/# 组件
+
+src-tauri/
+├── src/
+│   ├── api/    # 后端API
+│   ├── config/ # 配置
+│   ├── core/   # 核心
+│   └── service/# 服务
+└── locales/    # 后端i18n
+```
+
+## 开发规范
+
+### 代码风格
+
+- TypeScript严格模式
+- ESLint
+- Prettier
+- rustfmt
+
+### 命名规范
+
+- 组件: PascalCase
+- 函数/变量: camelCase
+- 常量: UPPER_SNAKE_CASE
+- 文件: kebab-case
+
+### Git提交规范
+
+格式：`<type>(<scope>): <subject> [emoji]`
+
+类型:
+
+- 🚀 feat: 新功能
+- 🐛 fix: bug修复
+- 📝 docs: 文档
+- 🎨 style: 格式
+- ♻️ refactor: 重构
+- ✅ test: 测试
+- 🔧 chore: 工具
+
+提交示例:
+
+```
+🚀 feat(mdns): add device discovery
+- 添加MDNS服务发现
+- 实现设备自动连接
+```
+
+### 性能要求
+
+- 最小化延迟
+- 优化事件处理
+- 减少状态更新
+- 使用缓存
+
+### 安全
+
+- 通信加密
+- 权限管理
+- 输入验证
+- 错误处理
+
+## 发布
+
+1. 语义化版本
+2. 更新日志
+3. 多平台测试
+4. 自动化发布

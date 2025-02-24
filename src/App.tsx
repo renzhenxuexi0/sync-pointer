@@ -31,7 +31,7 @@ function App() {
   const systemSettings = useSnapshot(settingsStore.systemSettings);
 
   return (
-    <ConfigProvider locale={systemSettings.locale === 'zh' ? zhCN : enUS}>
+    <ConfigProvider locale={systemSettings.locale === 'zh-CN' ? zhCN : enUS}>
       <ThemeProvider
         themeMode={systemSettings.theme}
         theme={{

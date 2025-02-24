@@ -9,7 +9,7 @@ import { proxy, subscribe } from 'valtio';
 export interface Settings {
   systemSettings: {
     theme: 'light' | 'dark' | 'auto';
-    locale: 'zh' | 'en' | 'auto';
+    locale: 'zh-CN' | 'en-US' | 'auto';
     autoStart: boolean;
   };
   serviceSettings: {
@@ -47,13 +47,13 @@ const settingsStore = proxy<Settings>({
   },
 });
 
-async function detectSystemLocale(): Promise<'zh' | 'en'> {
+async function detectSystemLocale(): Promise<'zh-CN' | 'en-US'> {
   try {
     const localeStr = (await locale()) || '';
-    return String(localeStr).toLowerCase().includes('zh') ? 'zh' : 'en';
+    return String(localeStr).toLowerCase().includes('zh') ? 'zh-CN' : 'en-US';
   } catch (error) {
     console.error('Failed to detect system locale:', error);
-    return 'en';
+    return 'en-US';
   }
 }
 
@@ -86,6 +86,10 @@ async function initializeSettings() {
 
   Object.assign(settingsStore, initSettings);
   i18n.changeLanguage(initSettings.systemSettings.locale);
+  document.documentElement.lang = initSettings.systemSettings.locale;
+  await setTheme(
+    initSettings.systemSettings.theme === 'auto' ? undefined : initSettings.systemSettings.theme,
+  );
   await settingsLocalStore.set('settings', initSettings);
   await restartMdns({
     mode: initSettings.serviceSettings.serviceType,
@@ -163,4 +167,3 @@ subscribe(settingsStore, async () => {
 });
 
 export { initializeSettings, settingsStore, updateServiceSettings, updateSystemSettings };
-

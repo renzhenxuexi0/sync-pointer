@@ -5,7 +5,9 @@
   },
   "menu": {
     "screen-layout": "Screen Layout",
-    "settings": "Settings"
+    "settings": "Settings",
+    "system-settings": "System Settings",
+    "service-settings": "Service Settings"
   },
   "screen-layout": {
     "client-alert": "Currently as a client, you can only view and not operate!",
@@ -24,7 +26,8 @@
       "hostname": {
         "label": "Hostname",
         "max": "The maximum length is 15 characters",
-        "tooltip": "Only alphanumeric and `-` symbols are supported for hostnames, and they cannot start or end with `-`."
+        "tooltip": "Only alphanumeric and `-` symbols are supported for hostname, and they cannot start or end with `-`.",
+        "required": "The hostname must be entered"
       },
       "label": "Service Settings",
       "service-type": {
@@ -37,9 +40,9 @@
     "system-settings": {
       "label": "System Settings",
       "language": {
-        "en": "English",
+        "en-US": "English",
         "label": "Language",
-        "zh": "Chinese"
+        "zh-CN": "Chinese"
       },
       "theme": {
         "dark": "Dark",
@@ -49,6 +52,11 @@
       "auto-start": {
         "label": "Start up"
       }
+    },
+    "form": {
+      "reset": "Reset",
+      "save": "Save",
+      "save-success": "Save successfully!"
     }
   }
 }

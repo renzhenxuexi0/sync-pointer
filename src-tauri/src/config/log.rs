@@ -23,6 +23,7 @@ pub fn init(log_path: PathBuf) -> Result<()> {
         Ok(())
     })?;
     default_log.set_flush_level_filter(spdlog::LevelFilter::All);
+    default_log.set_level_filter(spdlog::LevelFilter::All);
     spdlog::set_default_logger(default_log);
     Ok(())
 }

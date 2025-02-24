@@ -105,6 +105,8 @@ export {
   enableCellsStore,
   initializeDevices,
   parsePositionKey,
-  swapDevicePosition,
+  swapDevicePosition
 };
 export type { Device };
+
+

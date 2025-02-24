@@ -6,14 +6,14 @@ use std::{
     collections::HashMap,
     sync::{Arc, OnceLock},
 };
-use tokio::{sync::watch, task::JoinHandle};
+use tokio::{select, sync::oneshot, task::JoinHandle};
 
 use crate::{constant, service::Server};
 
 pub struct Mdns {
     pub servers: Arc<RwLock<HashMap<String, Server>>>,
     running_task: Arc<RwLock<Option<JoinHandle<()>>>>,
-    shutdown_tx: Arc<RwLock<Option<watch::Sender<bool>>>>,
+    shutdown_tx: Arc<RwLock<Option<oneshot::Sender<bool>>>>,
 }
 
 impl Mdns {
@@ -26,6 +26,10 @@ impl Mdns {
         })
     }
 
+    pub fn servers(&self) -> HashMap<String, Server> {
+        self.servers.read().clone()
+    }
+
     pub async fn start(&self) -> Result<()> {
         if self.running_task.read().is_some() {
             self.stop().await?;
@@ -36,31 +40,39 @@ impl Mdns {
         let receiver = daemon
             .browse(constant::MDNS_SERVICE_TYPE)
             .map_err(|e| anyhow::anyhow!("Failed to browse: {}", e))?;
-
-        let (tx, rx) = watch::channel(false);
-        let mut shutdown_tx = self.shutdown_tx.write();
-        *shutdown_tx = Some(tx);
-
         let servers = Arc::clone(&self.servers);
+
+        // 信号
+        let (send, mut recv) = oneshot::channel();
+        let mut shutdown_tx = self.shutdown_tx.write();
+        *shutdown_tx = Some(send);
+        // 定时器
+        let mut interval =
+            tokio::time::interval(tokio::time::Duration::from_secs(1));
+        // 任务
         let task = tokio::spawn(async move {
-            let rx = rx;
             let now = std::time::Instant::now();
             info!("mdns client started");
             loop {
-                if *rx.borrow() {
-                    info!("Received shutdown signal");
-                    break;
+                select! {
+                    cmd = &mut recv => {
+                        if cmd.is_ok() {
+                            info!("Received shutdown signal");
+                            break;
+                        }
+                    }
+                    _ = interval.tick() => {
+                        let elapsed = now.elapsed();
+                        if let Ok(event) = receiver.try_recv() {
+                            Self::handle_mdns_event(&servers, elapsed, event);
+                        }
+                    }
                 }
-
-                if let Ok(event) = receiver.try_recv() {
-                    Self::handle_mdns_event(&servers, now.elapsed(), event);
-                }
-                tokio::time::sleep(tokio::time::Duration::from_millis(100))
-                    .await;
             }
             if let Err(e) = daemon.shutdown() {
                 error!("Error shutting down mdns daemon: {}", e);
             }
+            info!("mdns client stopped");
         });
 
         let mut running_task = self.running_task.write();
@@ -87,7 +99,6 @@ impl Mdns {
             tx.send(true).map_err(|e| {
                 anyhow::anyhow!("Failed to send shutdown signal: {}", e)
             })?;
-            tx.closed().await;
         }
 
         if let Some(task) = task {
@@ -106,12 +117,7 @@ impl Mdns {
             let mut running_task = self.running_task.write();
             *running_task = None;
         }
-        info!("mdns client stopped");
         Ok(())
-    }
-
-    pub fn servers(&self) -> HashMap<String, Server> {
-        self.servers.read().clone()
     }
 
     fn handle_mdns_event(
@@ -193,17 +199,18 @@ mod tests {
 
     #[tokio::test]
     async fn test_start_stop() -> Result<()> {
+        spdlog::default_logger().set_level_filter(spdlog::LevelFilter::All);
         let mdns = Mdns::instance();
         mdns.start().await?;
         assert!(mdns.running_task.read().is_some());
         assert!(mdns.shutdown_tx.read().is_some());
-        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
         mdns.stop().await?;
         assert!(mdns.running_task.read().is_none());
         assert!(mdns.shutdown_tx.read().is_none());
         assert!(mdns.servers.read().is_empty());
 
-        tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
+        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
         Ok(())
     }
 }

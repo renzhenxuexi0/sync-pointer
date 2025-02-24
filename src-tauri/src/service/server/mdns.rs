@@ -7,7 +7,7 @@ use std::{
     sync::{Arc, OnceLock},
 };
 use tauri_plugin_os::hostname;
-use tokio::{sync::watch, task::JoinHandle};
+use tokio::{sync::oneshot, task::JoinHandle};
 
 use crate::constant;
 
@@ -16,7 +16,7 @@ pub struct Mdns {
     host: Arc<RwLock<String>>,
     port: Arc<RwLock<u16>>,
     running_task: Arc<RwLock<Option<JoinHandle<()>>>>,
-    shutdown_tx: Arc<RwLock<Option<watch::Sender<bool>>>>,
+    shutdown_tx: Arc<RwLock<Option<oneshot::Sender<bool>>>>,
 }
 
 impl Mdns {
@@ -55,20 +55,21 @@ impl Mdns {
         }
 
         let daemon = ServiceDaemon::new()?;
-
-        let (tx, mut rx) = watch::channel(false);
-        let mut shutdown_tx = self.shutdown_tx.write();
-        *shutdown_tx = Some(tx);
         let host_name = self.host() + ".local.";
         let service_info = ServiceInfo::new(
             constant::MDNS_SERVICE_TYPE,
             constant::MDNS_SERVER_NAME,
             &host_name,
-            "",
+            local_ip_address::local_ip()?,
             self.port(),
             HashMap::new(),
-        )?;
+        )?
+        .enable_addr_auto();
+        info!("Server Info {:?}", service_info);
 
+        let (tx, rx) = oneshot::channel();
+        let mut shutdown_tx = self.shutdown_tx.write();
+        *shutdown_tx = Some(tx);
         let task = tokio::spawn(async move {
             if let Err(e) = daemon.register(service_info) {
                 info!("Failed to register mdns service: {}", e);
@@ -76,11 +77,13 @@ impl Mdns {
             }
             info!("mdns server started");
             // 直接等待关闭信号
-            if rx.changed().await.is_ok() {
+            if rx.await.is_ok() {
+                info!("Received shutdown signal");
                 if let Err(e) = daemon.shutdown() {
                     info!("Failed to shutdown mdns daemon: {}", e);
                 }
             }
+            info!("mdns server stopped");
         });
 
         let mut running_task = self.running_task.write();
@@ -107,7 +110,6 @@ impl Mdns {
             tx.send(true).map_err(|e| {
                 anyhow::anyhow!("Failed to send shutdown signal: {}", e)
             })?;
-            tx.closed().await;
         }
 
         if let Some(task) = task {
@@ -122,7 +124,6 @@ impl Mdns {
             let mut running_task = self.running_task.write();
             *running_task = None;
         }
-        info!("mdns server stopped");
         Ok(())
     }
 }

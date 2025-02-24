@@ -18,8 +18,8 @@ function SystemSettings() {
         name="locale"
         label={t('settings.system-settings.language.label')}
         valueEnum={{
-          zh: t('settings.system-settings.language.zh'),
-          en: t('settings.system-settings.language.en'),
+          zhCN: t('settings.system-settings.language.zh-CN'),
+          enUS: t('settings.system-settings.language.en-US'),
           auto: t('settings.system'),
         }}
         allowClear={false}

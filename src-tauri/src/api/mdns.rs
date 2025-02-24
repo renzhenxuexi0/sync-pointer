@@ -12,12 +12,16 @@ pub async fn restart_mdns<R: Runtime>(
     port: Option<u16>,
 ) -> Result<(), String> {
     info!("Restart mDNS: mode={}, host={:?}, port={:?}", mode, host, port);
+    client::mdns::Mdns::instance().stop().await.map_err(|e| {
+        error!("Failed to stop mDNS discovery: {}", e);
+        e.to_string()
+    })?;
+    server::mdns::Mdns::instance().stop().await.map_err(|e| {
+        error!("Failed to stop mDNS server: {}", e);
+        e.to_string()
+    })?;
     match mode.as_str() {
         "server" => {
-            server::mdns::Mdns::instance().stop().await.map_err(|e| {
-                error!("Failed to stop mDNS server: {}", e);
-                e.to_string()
-            })?;
             if let Some(host) = host {
                 server::mdns::Mdns::instance().set_host(host);
             }
@@ -30,10 +34,6 @@ pub async fn restart_mdns<R: Runtime>(
             })?;
         }
         "client" => {
-            client::mdns::Mdns::instance().stop().await.map_err(|e| {
-                error!("Failed to stop mDNS discovery: {}", e);
-                e.to_string()
-            })?;
             client::mdns::Mdns::instance().start().await.map_err(|e| {
                 error!("Failed to start mDNS discovery: {}", e);
                 e.to_string()

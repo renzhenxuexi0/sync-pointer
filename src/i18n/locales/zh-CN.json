@@ -40,9 +40,9 @@
     "system-settings": {
       "label": "系统设置",
       "language": {
-        "en": "英文",
+        "en-US": "英文",
         "label": "语言",
-        "zh": "中文"
+        "zh-CN": "中文"
       },
       "theme": {
         "dark": "深色",

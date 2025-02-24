@@ -9,7 +9,7 @@ pub mod service;
 
 #[macro_use]
 extern crate rust_i18n;
-i18n!("locales", fallback = "zh");
+i18n!("locales", fallback = "zh-CN");
 
 #[allow(deprecated)]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
