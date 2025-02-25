@@ -1,3 +1,10 @@
 _version: 1
 menu:
   quit: Quit
+
+connection:
+  connect-request-dialog:
+    title: "Connection Request"
+    message: "Allow %{hostname} to connect"
+    accept: Accept
+    reject: Reject

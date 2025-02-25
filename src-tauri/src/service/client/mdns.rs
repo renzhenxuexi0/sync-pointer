@@ -2,16 +2,18 @@ use anyhow::Result;
 use mdns_sd::{ServiceDaemon, ServiceEvent};
 use parking_lot::RwLock;
 use spdlog::{debug, error, info};
-use std::{
-    collections::HashMap,
-    sync::{Arc, OnceLock},
-};
+use std::sync::{Arc, OnceLock};
 use tokio::{select, sync::oneshot, task::JoinHandle};
 
-use crate::{constant, service::Server};
+use crate::{
+    constant,
+    service::{
+        client,
+        module::connection::{DeviceInfo, ServiceType},
+    },
+};
 
 pub struct Mdns {
-    pub servers: Arc<RwLock<HashMap<String, Server>>>,
     running_task: Arc<RwLock<Option<JoinHandle<()>>>>,
     shutdown_tx: Arc<RwLock<Option<oneshot::Sender<bool>>>>,
 }
@@ -20,18 +22,17 @@ impl Mdns {
     pub fn instance() -> &'static Self {
         static MDNS: OnceLock<Mdns> = OnceLock::new();
         MDNS.get_or_init(|| Mdns {
-            servers: Arc::new(RwLock::new(HashMap::new())),
             running_task: Arc::new(RwLock::new(None)),
             shutdown_tx: Arc::new(RwLock::new(None)),
         })
     }
 
-    pub fn servers(&self) -> HashMap<String, Server> {
-        self.servers.read().clone()
+    fn is_running(&self) -> bool {
+        self.running_task.read().is_some()
     }
 
     pub async fn start(&self) -> Result<()> {
-        if self.running_task.read().is_some() {
+        if self.is_running() {
             self.stop().await?;
         }
 
@@ -40,7 +41,6 @@ impl Mdns {
         let receiver = daemon
             .browse(constant::MDNS_SERVICE_TYPE)
             .map_err(|e| anyhow::anyhow!("Failed to browse: {}", e))?;
-        let servers = Arc::clone(&self.servers);
 
         // 信号
         let (send, mut recv) = oneshot::channel();
@@ -64,7 +64,7 @@ impl Mdns {
                     _ = interval.tick() => {
                         let elapsed = now.elapsed();
                         if let Ok(event) = receiver.try_recv() {
-                            Self::handle_mdns_event(&servers, elapsed, event);
+                            Self::handle_mdns_event(elapsed, event).await;
                         }
                     }
                 }
@@ -81,7 +81,7 @@ impl Mdns {
     }
 
     pub async fn stop(&self) -> Result<()> {
-        if self.running_task.read().is_none() {
+        if !self.is_running() {
             debug!("mdns client not running");
             return Ok(());
         }
@@ -107,9 +107,6 @@ impl Mdns {
         }
 
         {
-            self.servers.write().clear();
-        }
-        {
             let mut shutdown_tx = self.shutdown_tx.write();
             *shutdown_tx = None;
         }
@@ -120,8 +117,7 @@ impl Mdns {
         Ok(())
     }
 
-    fn handle_mdns_event(
-        servers: &Arc<RwLock<HashMap<String, Server>>>,
+    async fn handle_mdns_event(
         elapsed: std::time::Duration,
         event: ServiceEvent,
     ) {
@@ -131,6 +127,7 @@ impl Mdns {
                 let hostname = info.get_hostname().to_string();
                 let addresses = info.get_addresses();
                 let port = info.get_port();
+                let properties = info.get_properties();
 
                 if addresses.is_empty() {
                     debug!(
@@ -141,42 +138,74 @@ impl Mdns {
                 }
 
                 info!(
-                    "At {:?}: Resolved service: {} (host: {}, port: {})",
-                    elapsed, fullname, hostname, port
+                    "At {:?}: Resolved service: {} (host: {}, port: {}, addresses: {:?}, properties: {:?})",
+                    elapsed, fullname, hostname, port, addresses, properties
                 );
 
-                for addr in addresses.iter() {
-                    debug!("Address: {}", addr);
-                }
+                // Get IP address
+                let ip = match addresses.iter().next().map(|ip| ip.to_string())
+                {
+                    Some(ip) => ip,
+                    None => {
+                        info!(
+                            "At {:?}: No address found for service {}",
+                            elapsed, fullname
+                        );
+                        return;
+                    }
+                };
 
-                for prop in info.get_properties().iter() {
-                    debug!("Property: {}", prop);
-                }
+                // Parse TCP and UDP ports from properties
+                let get_port = |key: &str| -> Option<u16> {
+                    properties
+                        .get(key)
+                        .and_then(|val| val.val_str().parse::<u16>().ok())
+                };
 
-                let mut servers = servers.write();
-                servers.insert(
-                    fullname.clone(),
-                    Server::new(
-                        hostname,
-                        addresses.clone(),
-                        port,
-                        info.get_properties().clone(),
-                    ),
-                );
-                info!("Service {} added to servers map", fullname);
-            }
-            ServiceEvent::ServiceRemoved(service_type, fullname) => {
-                let mut servers = servers.write();
-                if servers.remove(&fullname).is_some() {
-                    info!(
-                        "At {:?}: Removed service: {} of type {}",
-                        elapsed, fullname, service_type
-                    );
-                } else {
-                    debug!(
-                        "At {:?}: Attempted to remove non-existent service: {} of type {}",
-                        elapsed, fullname, service_type
-                    );
+                let tcp_port = match get_port("tcp_port") {
+                    Some(port) => port,
+                    None => {
+                        info!(
+                            "At {:?}: No valid tcp_port for service {}",
+                            elapsed, fullname
+                        );
+                        return;
+                    }
+                };
+
+                let udp_port = match get_port("udp_port") {
+                    Some(port) => port,
+                    None => {
+                        info!(
+                            "At {:?}: No valid udp_port for service {}",
+                            elapsed, fullname
+                        );
+                        return;
+                    }
+                };
+
+                let device_info = DeviceInfo {
+                    hostname,
+                    ip,
+                    tcp_port,
+                    udp_port,
+                    service_type: ServiceType::Server,
+                };
+                match client::tcp::TcpClient::instance()
+                    .start(device_info)
+                    .await
+                {
+                    Ok(_) => {
+                        // 关闭mdns
+                        let mdns = Mdns::instance();
+                        mdns.stop().await.ok();
+                    }
+                    Err(e) => {
+                        error!(
+                            "At {:?}: Failed to start tcp client: {}",
+                            elapsed, e
+                        );
+                    }
                 }
             }
             other_event => {
@@ -208,7 +237,6 @@ mod tests {
         mdns.stop().await?;
         assert!(mdns.running_task.read().is_none());
         assert!(mdns.shutdown_tx.read().is_none());
-        assert!(mdns.servers.read().is_empty());
 
         tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
         Ok(())

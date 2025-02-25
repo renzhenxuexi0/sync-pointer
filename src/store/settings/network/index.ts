@@ -13,27 +13,21 @@ export interface NetworkSettings {
   hostname: string;
   // IP 地址
   ip: string;
-  // 服务发现端口
-  discoveryPort: number;
-  // 服务端口
-  serverPort: number;
-  // 是否加密
-  encryption: boolean;
-  // 加密密码
-  encryptionPassword: string;
-  // 服务类型
-  serverType: 'tcp' | 'udp';
+  // 用于服务发现端口
+  mdnsPort: number;
+  // tcp端口 用于监听客户端连接和维护会话
+  tcpPort: number;
+  // udp端口 用于数据传输
+  udpPort: number;
 }
 
 // 本地存储
 const networkSettingsStore = proxy<NetworkSettings>({
   serviceType: 'client',
   hostname: 'Sync-Pointer',
-  discoveryPort: 3456,
-  serverPort: 3456,
-  encryption: false,
-  encryptionPassword: '',
-  serverType: 'tcp',
+  mdnsPort: 3456,
+  tcpPort: 3457,
+  udpPort: 3458,
   ip: '',
 });
 
@@ -44,11 +38,9 @@ async function initNetworkSettings() {
   const initSettings = {
     hostname: settings?.hostname || sys_hostname || 'Sync-Pointer',
     serviceType: settings?.serviceType || 'client',
-    discoveryPort: settings?.discoveryPort || 3456,
-    serverPort: settings?.serverPort || 3457,
-    encryption: settings?.encryption || false,
-    encryptionPassword: settings?.encryptionPassword || '',
-    serverType: settings?.serverType || 'udp',
+    discoveryPort: settings?.mdnsPort || 3456,
+    tcpPort: settings?.tcpPort || 3457,
+    udpPort: settings?.udpPort || 3458,
     ip: ip || settings?.ip || '',
   };
 

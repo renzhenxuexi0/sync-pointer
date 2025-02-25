@@ -14,7 +14,9 @@ use crate::constant;
 #[derive(Debug)]
 pub struct Mdns {
     host: Arc<RwLock<String>>,
-    port: Arc<RwLock<u16>>,
+    mdns_port: Arc<RwLock<u16>>,
+    tcp_port: Arc<RwLock<u16>>,
+    udp_port: Arc<RwLock<u16>>,
     running_task: Arc<RwLock<Option<JoinHandle<()>>>>,
     shutdown_tx: Arc<RwLock<Option<oneshot::Sender<bool>>>>,
 }
@@ -24,45 +26,93 @@ impl Mdns {
         static MDNS: OnceLock<Mdns> = OnceLock::new();
         MDNS.get_or_init(|| Mdns {
             host: Arc::new(RwLock::new(hostname())),
-            port: Arc::new(RwLock::new(3456)),
+            mdns_port: Arc::new(RwLock::new(constant::DEFAULT_MDNS_PORT)),
+            tcp_port: Arc::new(RwLock::new(constant::DEFAULT_TCP_PORT)),
+            udp_port: Arc::new(RwLock::new(constant::DEFAULT_UDP_PORT)),
             running_task: Arc::new(RwLock::new(None)),
             shutdown_tx: Arc::new(RwLock::new(None)),
         })
     }
 
-    pub fn set_host(&self, host: String) {
-        let mut host_guard = self.host.write();
-        *host_guard = host;
+    pub async fn update_server_info(
+        &self,
+        host: Option<String>,
+        mdns_port: Option<u16>,
+        tcp_port: Option<u16>,
+        udp_port: Option<u16>,
+    ) -> Result<()>{
+        if let Some(host) = host {
+            let mut host_guard = self.host.write();
+            *host_guard = host;
+            drop(host_guard); // Release lock before restarting
+        }
+        if let Some(mdns_port) = mdns_port {
+            let mut mdns_port_guard = self.mdns_port.write();
+            *mdns_port_guard = mdns_port;
+            drop(mdns_port_guard);
+        }
+
+        if let Some(tcp_port) = tcp_port {
+            let mut tcp_port_guard = self.tcp_port.write();
+            *tcp_port_guard = tcp_port;
+            drop(tcp_port_guard);
+        }
+
+        if let Some(udp_port) = udp_port {
+            let mut udp_port_guard = self.udp_port.write();
+            *udp_port_guard = udp_port;
+            drop(udp_port_guard);
+        }
+
+        self.restart_if_running().await
     }
 
-    pub fn set_port(&self, port: u16) {
-        let mut port_guard = self.port.write();
-        *port_guard = port;
+    fn is_running(&self) -> bool {
+        self.running_task.read().is_some()
+    }
+
+    async fn restart_if_running(&self) -> Result<()>{
+        if self.is_running() {
+            let mdns = Mdns::instance();
+            mdns.stop().await?;
+            mdns.start().await?;
+        }
+        Ok(())
     }
 
     pub fn host(&self) -> String {
         self.host.read().clone()
     }
-
-    pub fn port(&self) -> u16 {
-        *self.port.read()
+    pub fn mdns_port(&self) -> u16 {
+        *self.mdns_port.read()
+    }
+    pub fn tcp_port(&self) -> u16 {
+        *self.tcp_port.read()
+    }
+    pub fn udp_port(&self) -> u16 {
+        *self.udp_port.read()
     }
 
     pub async fn start(&self) -> Result<()> {
         // 如果已经运行，先停止
-        if self.running_task.read().is_some() {
+        if self.is_running() {
             self.stop().await?;
         }
 
         let daemon = ServiceDaemon::new()?;
         let host_name = self.host() + ".local.";
+        let mut properties = HashMap::new();
+        properties
+            .insert("tcp_port".to_string(), self.tcp_port.read().to_string());
+        properties
+            .insert("udp_port".to_string(), self.udp_port.read().to_string());
         let service_info = ServiceInfo::new(
             constant::MDNS_SERVICE_TYPE,
             constant::MDNS_SERVER_NAME,
             &host_name,
             local_ip_address::local_ip()?,
-            self.port(),
-            HashMap::new(),
+            self.mdns_port(),
+            properties,
         )?
         .enable_addr_auto();
         info!("Server Info {:?}", service_info);
@@ -92,7 +142,7 @@ impl Mdns {
     }
 
     pub async fn stop(&self) -> Result<()> {
-        if self.running_task.read().is_none() {
+        if !self.is_running() {
             debug!("mdns server not running");
             return Ok(());
         }
@@ -116,6 +166,7 @@ impl Mdns {
             task.await
                 .map_err(|e| anyhow::anyhow!("Task join error: {}", e))?;
         }
+
         {
             let mut shutdown_tx = self.shutdown_tx.write();
             *shutdown_tx = None;

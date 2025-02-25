@@ -1,3 +1,10 @@
 _version: 1
 menu:
-  quit: 退出
+  quit: "退出"
+
+connection:
+  connect-request-dialog:
+    title: "连接请求"
+    message: "是否允许 %{hostname} 连接"
+    accept: "接受"
+    reject: "拒绝"

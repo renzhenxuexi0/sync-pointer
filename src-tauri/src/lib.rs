@@ -53,7 +53,7 @@ pub fn run() {
             api::log::warn,
             api::log::error,
             // mdns
-            api::mdns::restart_mdns,
+            api::mdns::update_mdns_server_info,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
