@@ -3,8 +3,8 @@ use std::sync::OnceLock;
 use anyhow::Result;
 use spdlog::info;
 use tauri::{
-    tray::{MouseButton, MouseButtonState, TrayIconEvent, TrayIconId},
     Manager,
+    tray::{MouseButton, MouseButtonState, TrayIconEvent, TrayIconId},
 };
 
 use crate::constant;

@@ -4,8 +4,6 @@ pub const MDNS_SERVICE_TYPE: &str = "_sp._udp.local.";
 pub const MDNS_SERVER_NAME: &str = "sp";
 // 默认服务端口
 pub const DEFAULT_TCP_PORT: u16 = 3457;
-// 默认UDP端口
-pub const DEFAULT_UDP_PORT: u16 = 3458;
 // 默认MDNS端口
 pub const DEFAULT_MDNS_PORT: u16 = 3456;
 // 客户端重试次数

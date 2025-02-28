@@ -48,7 +48,9 @@ tokio = { version = "1", default-features = false, features = [
     "net",
     "fs",
 ] }
+tokio-util = { version = "0.7", features = ["codec"] }
 parking_lot = "0.12"
+futures-util = "0.3.31"
 # 错误
 anyhow = "1.0"
 # 序列化

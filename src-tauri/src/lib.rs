@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate rust_i18n;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_autostart::MacosLauncher;
 
@@ -7,8 +9,6 @@ pub mod constant;
 pub mod core;
 pub mod service;
 
-#[macro_use]
-extern crate rust_i18n;
 i18n!("locales", fallback = "zh-CN");
 
 #[allow(deprecated)]
@@ -53,6 +53,10 @@ pub fn run() {
             api::log::warn,
             api::log::error,
             // mdns
+            api::mdns::start_mdns_client,
+            api::mdns::stop_mdns_client,
+            api::mdns::start_mdns_server,
+            api::mdns::stop_mdns_server,
             api::mdns::update_mdns_server_info,
         ])
         .run(tauri::generate_context!())

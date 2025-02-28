@@ -1,51 +1,54 @@
 use std::sync::{Arc, OnceLock};
 
-use anyhow::{Result, anyhow};
-use dashmap::DashMap;
-use parking_lot::RwLock;
-use spdlog::{debug, error, info};
-use tauri_plugin_dialog::DialogExt;
-use tokio::{net::TcpListener, select, sync::oneshot, task::JoinHandle};
-
+use super::session::SessionContext;
+use crate::service::codec::DataPacketCodec;
+use crate::service::module::connection;
+use crate::service::module::protocol::DataPacket;
+use crate::service::server::listener::ServerListener;
 use crate::{
     constant,
     core::handle::Handle,
-    service::{module::connection::DeviceInfo, session::SessionContext},
+    service::{ServiceControl, module::connection::DeviceInfo},
 };
+use anyhow::{Result, anyhow};
+use dashmap::DashMap;
+use futures_util::StreamExt;
+use parking_lot::RwLock;
+use spdlog::{error, info};
+use tauri_plugin_dialog::DialogExt;
+use tokio::io::AsyncWriteExt;
+use tokio::{net::TcpListener, select, sync::oneshot};
+use tokio_util::codec::Framed;
 
 // Connection manager
 pub struct TcpServer {
-    connections: Arc<DashMap<String, SessionContext>>,
+    sessions: Arc<DashMap<String, SessionContext>>,
     // Server port
     port: Arc<RwLock<u16>>,
-    // Running task handle
-    running_task: Arc<RwLock<Option<JoinHandle<()>>>>,
-    // Shutdown channel
-    shutdown_tx: Arc<RwLock<Option<oneshot::Sender<bool>>>>,
+    service_control: ServiceControl,
 }
 
 impl TcpServer {
     pub fn instance() -> &'static Self {
         static INSTANCE: OnceLock<TcpServer> = OnceLock::new();
         INSTANCE.get_or_init(|| TcpServer {
-            connections: Arc::new(DashMap::new()),
+            sessions: Arc::new(DashMap::new()),
             port: Arc::new(RwLock::new(constant::DEFAULT_TCP_PORT)),
-            running_task: Arc::new(RwLock::new(None)),
-            shutdown_tx: Arc::new(RwLock::new(None)),
+            service_control: ServiceControl::new("TCP Server".to_string()),
         })
     }
 
-    fn connections(&self) -> Arc<DashMap<String, SessionContext>> {
-        self.connections.clone()
+    fn sessions(&self) -> Arc<DashMap<String, SessionContext>> {
+        self.sessions.clone()
     }
 
     /// 是否正在运行
     fn is_running(&self) -> bool {
-        self.running_task.read().is_some()
+        self.service_control.is_running()
     }
 
     /// 处理连接请求 是否同意连接
-    async fn handle_connection_request(
+    async fn _handle_connection_request(
         device_info: DeviceInfo,
     ) -> Result<bool> {
         let app_handle = Handle::instance()
@@ -71,7 +74,7 @@ impl TcpServer {
     }
 
     // 同意连接请求
-    async fn accept_connection(&self, _device_info: DeviceInfo) -> Result<()> {
+    async fn _accept_connection(&self, _device_info: DeviceInfo) -> Result<()> {
         // TODO 发送tauri事件 前端监听事件进行更新设备信
         Ok(())
     }
@@ -104,88 +107,74 @@ impl TcpServer {
 
         let port = *self.port.read();
 
-        let (shutdown_tx, mut shutdown_rx) = oneshot::channel::<bool>();
-        let mut tx_guard = self.shutdown_tx.write();
-        *tx_guard = Some(shutdown_tx);
-
-        let task = tokio::spawn(async move {
-            let addr = format!("127.0.0.1:{}", port);
-            let listener = match TcpListener::bind(&addr).await {
-                Ok(listener) => listener,
-                Err(e) => {
-                    // TODO 待优化
-                    error!("Failed to bind to address {}: {}", addr, e);
-                    return;
-                }
-            };
-
-            info!("TCP server started, listening on: {}", addr);
-
-            loop {
-                select! {
-                    _ = &mut shutdown_rx => {
-                        info!("TCP server received shutdown signal");
-                        break;
+        let tcp_start_logic = move |mut rx: oneshot::Receiver<bool>| {
+            let task = tokio::spawn(async move {
+                let addr = format!("127.0.0.1:{}", port);
+                let listener = match TcpListener::bind(&addr).await {
+                    Ok(listener) => listener,
+                    Err(e) => {
+                        // TODO 待优化
+                        error!("Failed to bind to address {}: {}", addr, e);
+                        return;
                     }
-                    accept_result = listener.accept() => {
-                        match accept_result {
-                            Ok((stream, addr)) => {
-                                info!("Received connection request from {}", addr);
-                                Self::instance().connections().insert(addr.to_string(), SessionContext::new(Arc::new(stream)));
-                            }
-                            Err(e) => {
-                                error!("Failed to accept connection: {}", e);
+                };
+
+                info!("TCP server started, listening on: {}", addr);
+
+                loop {
+                    select! {
+                        _ = &mut rx => {
+                            info!("TCP server received shutdown signal");
+                            break;
+                        }
+                        accept_result = listener.accept() => {
+                            match accept_result {
+                                Ok((stream, addr)) => {
+                                    info!("Received connection request from {}", addr);
+
+                                    let framed = Framed::new(stream, DataPacketCodec);
+                                    let (writer, reader) = framed.split::<DataPacket>();
+                                    let mut listener = ServerListener::new(addr.to_string(), reader);
+                                    match listener.run().await {
+                                        Ok(()) => {
+                                            info!("Start Listener {}", addr);
+                                            let session_context = SessionContext::new(writer, listener);
+                                            Self::instance().sessions().insert(addr.to_string(), session_context);
+                                        }
+                                        Err(e) => {
+                                            error!("Failed to start Listener {}", addr);
+                                            let session = Self::instance().sessions().remove(&addr.to_string());
+                                            if let Some((_, mut session)) = session {
+                                                match session.shutdown().await{
+                                                    Ok(_) => {
+                                                        info!("Session shutdown successfully");
+                                                    }
+                                                    Err(_) => {
+                                                        error!("Failed to shutdown session");
+                                                    }
+                                                };
+                                            }
+                                        }
+                                    }
+                                }
+                                Err(e) => {
+                                    error!("Failed to accept connection: {}", e);
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            info!("TCP server stopped");
-        });
+                info!("TCP server stopped");
+            });
+            Ok(task)
+        };
 
-        let mut task_guard = self.running_task.write();
-        *task_guard = Some(task);
-
-        Ok(())
+        self.service_control.start(tcp_start_logic).await
     }
 
     // Stop server
     pub async fn stop(&self) -> Result<()> {
-        if !self.is_running() {
-            debug!("tcp server not running");
-            return Ok(());
-        }
-        let tx = {
-            let mut shutdown_tx = self.shutdown_tx.write();
-            shutdown_tx.take()
-        };
-
-        let task = {
-            let mut running_task = self.running_task.write();
-            running_task.take()
-        };
-
-        if let Some(tx) = tx {
-            tx.send(true).map_err(|e| {
-                anyhow::anyhow!("Failed to send shutdown signal: {}", e)
-            })?;
-        }
-
-        if let Some(task) = task {
-            task.await
-                .map_err(|e| anyhow::anyhow!("Task join error: {}", e))?;
-        }
-
-        {
-            let mut shutdown_tx = self.shutdown_tx.write();
-            *shutdown_tx = None;
-        }
-        {
-            let mut running_task = self.running_task.write();
-            *running_task = None;
-        }
-        info!("tcp server is stopped");
-        Ok(())
+        self.service_control.stop().await
     }
 }

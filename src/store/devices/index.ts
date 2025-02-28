@@ -10,7 +10,8 @@ interface Device {
   col: number;
   hostname: string;
   ip: string;
-  port: number;
+  tcp_port: number;
+  mdns_port: number;
   serviceType: 'server' | 'client';
   isMe: boolean;
   status: 'online' | 'offline';
@@ -40,7 +41,8 @@ async function initDevices() {
       col: 2,
       hostname: networkSettingsStore.hostname,
       ip: networkSettingsStore.ip,
-      port: networkSettingsStore.serverPort,
+      tcp_port: networkSettingsStore.tcpPort,
+      mdns_port: networkSettingsStore.mdnsPort,
       serviceType: networkSettingsStore.serviceType,
       isMe: true,
       status: 'online',
@@ -102,7 +104,6 @@ export {
   enableCellsStore,
   initDevices,
   parsePositionKey,
-  swapDevicePosition
+  swapDevicePosition,
 };
 export type { Device };
-

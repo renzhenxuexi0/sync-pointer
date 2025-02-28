@@ -17,8 +17,6 @@ pub struct DeviceInfo {
     pub ip: String,
     /// tcp端口
     pub tcp_port: u16,
-    /// udp端口
-    pub udp_port: u16,
     /// 服务类型
     pub service_type: ServiceType,
 }

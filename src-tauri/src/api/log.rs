@@ -1,4 +1,4 @@
-use tauri::{command, Runtime};
+use tauri::{Runtime, command};
 
 #[command]
 pub fn trace<R: Runtime>(

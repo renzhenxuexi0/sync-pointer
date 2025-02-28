@@ -1,4 +1,10 @@
-import { restartMdns } from '@/api/mdns';
+import {
+  startMdnsClient,
+  startMdnsServer,
+  stopMdnsClient,
+  stopMdnsServer,
+  updateMdnsServerInfo,
+} from '@/api/mdns';
 import { localIp } from '@/api/sys';
 import { hostname } from '@tauri-apps/plugin-os';
 import { proxy, subscribe } from 'valtio';
@@ -15,10 +21,8 @@ export interface NetworkSettings {
   ip: string;
   // 用于服务发现端口
   mdnsPort: number;
-  // tcp端口 用于监听客户端连接和维护会话
+  // tcp端口 用于监听客户端连接和维护会话数据传输
   tcpPort: number;
-  // udp端口 用于数据传输
-  udpPort: number;
 }
 
 // 本地存储
@@ -27,7 +31,7 @@ const networkSettingsStore = proxy<NetworkSettings>({
   hostname: 'Sync-Pointer',
   mdnsPort: 3456,
   tcpPort: 3457,
-  udpPort: 3458,
+  // 不可修改
   ip: '',
 });
 
@@ -40,38 +44,63 @@ async function initNetworkSettings() {
     serviceType: settings?.serviceType || 'client',
     discoveryPort: settings?.mdnsPort || 3456,
     tcpPort: settings?.tcpPort || 3457,
-    udpPort: settings?.udpPort || 3458,
     ip: ip || settings?.ip || '',
   };
 
   Object.assign(networkSettingsStore, initSettings);
   await settingsLocalStore.set(KEY, initSettings);
-  await restartMdns({
-    mode: initSettings.serviceType,
-    host: initSettings.hostname,
-    port: initSettings.discoveryPort,
+  await updateMdnsServerInfo({
+    host: networkSettingsStore.hostname,
+    mdnsPort: networkSettingsStore.mdnsPort,
+    tcpPort: networkSettingsStore.tcpPort,
   });
+  if (networkSettingsStore.serviceType === 'server') {
+    await startMdnsServer();
+  } else {
+    await startMdnsClient();
+  }
 }
 
 async function updateNetworkSettings(networkSettings: Partial<NetworkSettings>) {
+  let isNeedUpdate = false;
   if (networkSettings.hostname && networkSettings.hostname !== networkSettingsStore.hostname) {
     networkSettingsStore.hostname = networkSettings.hostname;
+    isNeedUpdate = true;
+  }
+
+  if (networkSettings.mdnsPort && networkSettings.mdnsPort !== networkSettingsStore.mdnsPort) {
+    networkSettingsStore.mdnsPort = networkSettings.mdnsPort;
+    isNeedUpdate = true;
+  }
+
+  if (networkSettings.tcpPort && networkSettings.tcpPort !== networkSettingsStore.tcpPort) {
+    networkSettingsStore.tcpPort = networkSettings.tcpPort;
+    isNeedUpdate = true;
+  }
+
+  if (isNeedUpdate) {
+    updateMdnsServerInfo({
+      host: networkSettings.hostname,
+      mdnsPort: networkSettings.mdnsPort,
+      tcpPort: networkSettings.tcpPort,
+    });
   }
 
   if (
     networkSettings.serviceType &&
     networkSettings.serviceType !== networkSettingsStore.serviceType
   ) {
-    await restartMdns({
-      mode: networkSettings.serviceType,
-      host: networkSettingsStore.hostname,
-    })
-      .then(() => {
-        networkSettingsStore.serviceType = networkSettings.serviceType!;
-      })
-      .catch((e) => {
-        console.error(e);
-      });
+    if (networkSettings.serviceType === 'server') {
+      // 关闭客户端
+      await stopMdnsClient();
+      // 开启服务端
+      await startMdnsServer();
+    } else {
+      // 关闭服务端
+      await stopMdnsServer();
+      // 开启客户端
+      await startMdnsClient();
+    }
   }
 }
 
@@ -81,4 +110,3 @@ subscribe(networkSettingsStore, async () => {
 });
 
 export { initNetworkSettings, networkSettingsStore, updateNetworkSettings };
-
