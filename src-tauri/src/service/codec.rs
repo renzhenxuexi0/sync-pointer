@@ -1,8 +1,11 @@
 use crate::service::module::protocol::DataPacket;
 use anyhow::anyhow;
+use futures_util::stream::{SplitSink, SplitStream};
 use rkyv::rancor::Error;
+use tokio::net::TcpStream;
 use tokio_util::bytes::{BufMut, BytesMut};
 use tokio_util::codec;
+use tokio_util::codec::Framed;
 
 pub struct DataPacketCodec;
 
@@ -20,7 +23,7 @@ impl codec::Encoder<DataPacket> for DataPacketCodec {
         item: DataPacket,
         dst: &mut BytesMut,
     ) -> Result<(), Self::Error> {
-        let mut data = rkyv::to_bytes::<Error>(&item)
+        let data = rkyv::to_bytes::<Error>(&item)
             .map_err(|e| anyhow!("DataPacketCodecError: {}", e))?;
         let data = data.as_slice();
         let data_len = data.len();
@@ -87,3 +90,7 @@ impl codec::Decoder for DataPacketCodec {
         Ok(Some(archived))
     }
 }
+
+pub type DataPacketWriter =
+    SplitSink<Framed<TcpStream, DataPacketCodec>, DataPacket>;
+pub type DataPacketReader = SplitStream<Framed<TcpStream, DataPacketCodec>>;

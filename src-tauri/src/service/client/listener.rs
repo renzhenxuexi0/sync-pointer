@@ -16,19 +16,17 @@ use tokio::sync::oneshot;
 use tokio::task::JoinHandle;
 use tokio_util::codec::Framed;
 
-/// 服务端监听器
-pub struct ServerListener {
-    addr: String,
+/// 客户端监听器
+pub struct ClientListener {
     reader: DataPacketReader,
     service_control: ServiceControl,
 }
 
-impl ServerListener {
-    pub fn new(addr: String, reader: DataPacketReader) -> Self {
-        ServerListener {
-            addr,
+impl ClientListener {
+    pub fn new(reader: DataPacketReader) -> Self {
+        ClientListener {
             reader,
-            service_control: ServiceControl::new("Server Listener".to_string()),
+            service_control: ServiceControl::new("Client Listener".to_string()),
         }
     }
 

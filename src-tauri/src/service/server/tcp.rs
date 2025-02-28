@@ -133,7 +133,7 @@ impl TcpServer {
                                     info!("Received connection request from {}", addr);
 
                                     let framed = Framed::new(stream, DataPacketCodec);
-                                    let (writer, reader) = framed.split::<DataPacket>();
+                                    let (writer, reader) = framed.split();
                                     let mut listener = ServerListener::new(addr.to_string(), reader);
                                     match listener.run().await {
                                         Ok(()) => {

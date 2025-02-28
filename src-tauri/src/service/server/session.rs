@@ -1,22 +1,19 @@
-use crate::service::codec::DataPacketCodec;
+use crate::service::codec::DataPacketWriter;
 use crate::service::module::connection::DeviceInfo;
 use crate::service::module::protocol::DataPacket;
 use crate::service::server::listener::ServerListener;
 use futures_util::SinkExt;
-use futures_util::stream::SplitSink;
 use tokio::io::AsyncWriteExt;
-use tokio::net::TcpStream;
-use tokio_util::codec::Framed;
 
 pub struct SessionContext {
     device_info: Option<DeviceInfo>,
     server_listener: ServerListener,
-    writer: SplitSink<Framed<TcpStream, DataPacketCodec>, DataPacket>,
+    writer: DataPacketWriter,
 }
 
 impl SessionContext {
     pub fn new(
-        writer: SplitSink<Framed<TcpStream, DataPacketCodec>, DataPacket>,
+        writer: DataPacketWriter,
         server_listener: ServerListener,
     ) -> Self {
         SessionContext { device_info: None, writer, server_listener }
