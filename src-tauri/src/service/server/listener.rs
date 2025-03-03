@@ -1,38 +1,40 @@
+use std::sync::Arc;
+
 use crate::service::ServiceControl;
-use crate::service::codec::{
-    DataPacketCodec, DataPacketReader, DataPacketWriter,
-};
-use crate::service::module::protocol::DataPacket;
-use crate::service::server::session::SessionContext;
+use crate::service::codec::DataPacketReader;
 use anyhow::Result;
 use futures_util::StreamExt;
-use futures_util::stream::{SplitSink, SplitStream};
-use spdlog::{debug, error, info};
-use tokio::io::{self, AsyncReadExt};
-use tokio::net::TcpStream;
-use tokio::net::tcp::OwnedReadHalf;
-use tokio::select;
+use parking_lot::RwLock;
+use spdlog::{error, info};
 use tokio::sync::oneshot;
 use tokio::task::JoinHandle;
-use tokio_util::codec::Framed;
+use tokio::{select, time::Instant};
 
 /// 服务端监听器
 pub struct ServerListener {
-    addr: String,
-    reader: DataPacketReader,
+    last_activity: Arc<RwLock<Instant>>,
     service_control: ServiceControl,
 }
 
-impl ServerListener {
-    pub fn new(addr: String, reader: DataPacketReader) -> Self {
-        ServerListener {
-            addr,
-            reader,
+impl Default for ServerListener {
+    fn default() -> Self {
+        Self {
+            last_activity: Arc::new(RwLock::new(Instant::now())),
             service_control: ServiceControl::new("Server Listener".to_string()),
         }
     }
+}
 
-    pub async fn run(&mut self) -> Result<()> {
+impl ServerListener {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub async fn start(&self, mut reader: DataPacketReader) -> Result<()> {
+        let last_activity = self.last_activity.clone();
+        // 创建定时器
+        let mut interval =
+            tokio::time::interval(tokio::time::Duration::from_secs(1));
         let mdns_start_logic =
             move |mut rx: oneshot::Receiver<bool>| -> Result<JoinHandle<()>> {
                 let task = tokio::spawn(async move {
@@ -42,16 +44,26 @@ impl ServerListener {
                                 info!("Received shutdown signal");
                                 break;
                             },
-                            result = self.reader.next() => {
+                            _ = interval.tick() => {
+                                // 检查会话是否活跃 如果120s无活动则关闭连接
+                                let last_activity = last_activity.read();
+                                if last_activity.elapsed().as_secs() > 120 {
+                                    info!("No activity for 120s, closing connection, last activity: {:?}", *last_activity);
+                                    break;
+                                }
+                            }
+                            result = reader.next() => {
                                 match result {
                                     None  => {
                                         // Connection closed
                                         info!("Connection closed");
                                         break;
                                     }
-                                    Some(Ok(req_resp)) => {
+                                    Some(Ok(_data)) => {
                                         // Message received
-                                        todo!("Not Implemented")
+                                        let mut last_activity_guard = last_activity.write();
+                                        *last_activity_guard = Instant::now();
+                                        drop(last_activity_guard);
                                     }
                                     Some(Err(e)) => {
                                         // Error occurred
@@ -62,6 +74,8 @@ impl ServerListener {
                             }
                         }
                     }
+                    drop(reader);
+                    drop(last_activity);
                 });
                 Ok(task)
             };
@@ -69,14 +83,8 @@ impl ServerListener {
         Ok(())
     }
 
-    pub async fn shutdown(&mut self) -> Result<()> {
-        self.service_control.stop().await
-    }
-
-    async fn handle_message(&mut self, message: &[u8]) -> Result<()> {
-        // Process the received message
-        info!("Received message: {:?}", message);
-        // You can add more logic here to handle different types of messages
+    pub async fn shutdown(&self) -> Result<()> {
+        self.service_control.stop().await?;
         Ok(())
     }
 }

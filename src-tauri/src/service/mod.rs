@@ -1,6 +1,7 @@
 pub mod client;
 pub mod codec;
-pub mod module;
+pub mod handler;
+pub mod protocols;
 pub mod server;
 
 use anyhow::{Result, anyhow};

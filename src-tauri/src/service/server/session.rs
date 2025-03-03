@@ -1,9 +1,8 @@
-use crate::service::codec::DataPacketWriter;
-use crate::service::module::connection::DeviceInfo;
-use crate::service::module::protocol::DataPacket;
-use crate::service::server::listener::ServerListener;
+use crate::service::{codec::DataPacketWriter, protocols::base::DeviceInfo};
+use crate::service::{
+    protocols::base::DataPacket, server::listener::ServerListener,
+};
 use futures_util::SinkExt;
-use tokio::io::AsyncWriteExt;
 
 pub struct SessionContext {
     device_info: Option<DeviceInfo>,

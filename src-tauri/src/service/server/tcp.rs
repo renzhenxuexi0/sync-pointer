@@ -2,21 +2,13 @@ use std::sync::{Arc, OnceLock};
 
 use super::session::SessionContext;
 use crate::service::codec::DataPacketCodec;
-use crate::service::module::connection;
-use crate::service::module::protocol::DataPacket;
 use crate::service::server::listener::ServerListener;
-use crate::{
-    constant,
-    core::handle::Handle,
-    service::{ServiceControl, module::connection::DeviceInfo},
-};
-use anyhow::{Result, anyhow};
+use crate::{constant, service::ServiceControl};
+use anyhow::Result;
 use dashmap::DashMap;
 use futures_util::StreamExt;
 use parking_lot::RwLock;
 use spdlog::{error, info};
-use tauri_plugin_dialog::DialogExt;
-use tokio::io::AsyncWriteExt;
 use tokio::{net::TcpListener, select, sync::oneshot};
 use tokio_util::codec::Framed;
 
@@ -45,38 +37,6 @@ impl TcpServer {
     /// 是否正在运行
     fn is_running(&self) -> bool {
         self.service_control.is_running()
-    }
-
-    /// 处理连接请求 是否同意连接
-    async fn _handle_connection_request(
-        device_info: DeviceInfo,
-    ) -> Result<bool> {
-        let app_handle = Handle::instance()
-            .app_handle()
-            .ok_or_else(|| anyhow!("Cannot get app handle"))?;
-
-        let message = t!(
-            "connection.connect-request-dialog.message",
-            "hostname" => device_info.hostname.clone(),
-        );
-
-        let result = app_handle
-            .dialog()
-            .message(message)
-            .kind(tauri_plugin_dialog::MessageDialogKind::Info)
-            .title(t!("connection.connect-request-dialog.title"))
-            .buttons(tauri_plugin_dialog::MessageDialogButtons::OkCancelCustom(
-                t!("connection.connect-request-dialog.accept").to_string(),
-                t!("connection.connect-request-dialog.reject").to_string(),
-            ))
-            .blocking_show();
-        Ok(result)
-    }
-
-    // 同意连接请求
-    async fn _accept_connection(&self, _device_info: DeviceInfo) -> Result<()> {
-        // TODO 发送tauri事件 前端监听事件进行更新设备信
-        Ok(())
     }
 
     // 更新服务信息
@@ -132,31 +92,18 @@ impl TcpServer {
                                 Ok((stream, addr)) => {
                                     info!("Received connection request from {}", addr);
 
-                                    let framed = Framed::new(stream, DataPacketCodec);
+                                    let framed = Framed::new(stream, DataPacketCodec::default());
                                     let (writer, reader) = framed.split();
-                                    let mut listener = ServerListener::new(addr.to_string(), reader);
-                                    match listener.run().await {
-                                        Ok(()) => {
-                                            info!("Start Listener {}", addr);
-                                            let session_context = SessionContext::new(writer, listener);
-                                            Self::instance().sessions().insert(addr.to_string(), session_context);
-                                        }
-                                        Err(e) => {
-                                            error!("Failed to start Listener {}", addr);
-                                            let session = Self::instance().sessions().remove(&addr.to_string());
-                                            if let Some((_, mut session)) = session {
-                                                match session.shutdown().await{
-                                                    Ok(_) => {
-                                                        info!("Session shutdown successfully");
-                                                    }
-                                                    Err(_) => {
-                                                        error!("Failed to shutdown session");
-                                                    }
-                                                };
-                                            }
-                                        }
+                                    let listener = ServerListener::new();
+                                    if let Err(e) = listener.start(reader).await {
+                                        error!("Failed to start listener: {}", e);
+                                        drop(writer);
+                                        continue;
                                     }
-                                }
+                                    let session_context = SessionContext::new(writer, listener);
+                                    Self::instance().sessions().insert(addr.to_string(), session_context);
+
+                            }
                                 Err(e) => {
                                     error!("Failed to accept connection: {}", e);
                                 }

@@ -6,11 +6,10 @@ use tokio::{select, sync::oneshot, task::JoinHandle};
 
 use crate::{
     constant,
-    service::{
-        ServiceControl, client,
-        module::connection::{DeviceInfo, ServiceType},
-    },
+    service::{ServiceControl, client},
 };
+
+use super::ServerInfo;
 
 pub struct Mdns {
     service_control: ServiceControl,
@@ -112,7 +111,7 @@ impl Mdns {
     async fn resolve_device_info(
         elapsed: std::time::Duration,
         info: mdns_sd::ServiceInfo,
-    ) -> Option<DeviceInfo> {
+    ) -> Option<ServerInfo> {
         let fullname = info.get_fullname().to_string();
         let hostname = info.get_hostname().to_string();
         let addresses = info.get_addresses();
@@ -136,12 +135,7 @@ impl Mdns {
         let tcp_port =
             Self::get_port(properties, "tcp_port", elapsed, &fullname)?;
 
-        Some(DeviceInfo {
-            hostname,
-            ip,
-            tcp_port,
-            service_type: ServiceType::Server,
-        })
+        Some(ServerInfo { hostname, ip, tcp_port })
     }
 
     fn get_port(

@@ -1,26 +1,29 @@
-use crate::service::client::listener::ClientListener;
-use crate::service::codec::{DataPacketCodec, DataPacketWriter};
-use crate::service::module::protocol::DataPacket;
-use crate::service::{ServiceControl, module::connection::DeviceInfo};
-use anyhow::{Result, anyhow};
-use futures_util::{SinkExt, StreamExt};
+use anyhow::Result;
+use futures_util::StreamExt;
 use parking_lot::RwLock;
-use spdlog::{debug, error, info};
+use spdlog::{error, info};
 use std::sync::{Arc, OnceLock};
-use tokio::{io, net::TcpStream, select, sync::oneshot, task::JoinHandle};
+use tokio::{net::TcpStream, select, sync::oneshot, task::JoinHandle};
 use tokio_util::codec::Framed;
 
+use crate::service::{
+    ServiceControl,
+    codec::{DataPacketCodec, DataPacketReader, DataPacketWriter},
+};
+
+use super::ServerInfo;
+
 pub struct TcpClient {
-    service_control: ServiceControl,
     writer: Arc<RwLock<Option<DataPacketWriter>>>,
+    service_control: ServiceControl,
 }
 
 impl TcpClient {
     pub fn instance() -> &'static Self {
         static INSTANCE: OnceLock<TcpClient> = OnceLock::new();
         INSTANCE.get_or_init(|| TcpClient {
-            service_control: ServiceControl::new("Tcp Client".to_string()),
             writer: Arc::new(RwLock::new(None)),
+            service_control: ServiceControl::new("Tcp Client".to_string()),
         })
     }
 
@@ -28,17 +31,8 @@ impl TcpClient {
         self.service_control.is_running()
     }
 
-    pub async fn send(&self, data: DataPacket) -> Result<()> {
-        let mut writer_guard = self.writer.write();
-        if let Some(mut writer) = writer_guard.take() {
-            writer.send(data).await?;
-            Ok(())
-        } else {
-            Err(anyhow!("Writer is not set"))
-        }
-    }
-
-    pub async fn start(&self, server_info: DeviceInfo) -> Result<()> {
+    pub async fn start(&self, server_info: ServerInfo) -> Result<()> {
+        let writer = self.writer.clone();
         let tcp_start_logic =
             move |rx: oneshot::Receiver<bool>| -> Result<JoinHandle<()>> {
                 let server_addr =
@@ -55,40 +49,14 @@ impl TcpClient {
                             return;
                         }
                     };
-                    let framed = Framed::new(stream, DataPacketCodec);
-                    let (writer, reader) = framed.split();
-                    let writer_guard = self.writer.write();
-                    *writer_guard = Some(writer);
-                    // 释放 writer_guard 以释放锁
-                    drop(writer_guard);
-                    let mut listener = ClientListener::new(reader);
-                    match listener.run().await {
-                        Ok(_) => {
-                            // 开始监听
-                            info!("Client listener start");
-                        }
-                        Err(e) => {
-                            // 关闭连接
-                            error!("Client listener error: {}", e);
-                            let mut writer_guard = self.writer.write();
-                            if let Some(mut writer) = writer_guard.take() {
-                                writer.close().await?;
-                            }
-                            *writer_guard = None;
-                            drop(writer_guard);
-                            match listener.shutdown().await {
-                                Ok(_) => {
-                                    info!("Listener shutdown successfully");
-                                }
-                                Err(e) => {
-                                    error!(
-                                        "Failed to shutdown listener: {}",
-                                        e
-                                    );
-                                }
-                            }
-                        }
+                    let framed =
+                        Framed::new(stream, DataPacketCodec::default());
+                    let (split_writer, reader) = framed.split();
+                    {
+                        let mut writer_guard = writer.write();
+                        *writer_guard = Some(split_writer);
                     }
+                    Self::handle_connection(reader, rx).await;
                 });
 
                 Ok(task)
@@ -99,5 +67,38 @@ impl TcpClient {
 
     pub async fn stop(&self) -> Result<()> {
         self.service_control.stop().await
+    }
+
+    async fn handle_connection(
+        mut reader: DataPacketReader,
+        mut rx: oneshot::Receiver<bool>,
+    ) {
+        loop {
+            select! {
+                _ = &mut rx => {
+                    info!("Received shutdown signal");
+                    break;
+                },
+                result = reader.next() => {
+                    match result {
+                        None  => {
+                            // Connection closed
+                            info!("Connection closed");
+                            break;
+                        }
+                        Some(Ok(_data)) => {
+                            // Message received
+                            todo!("Not Implemented")
+                        }
+                        Some(Err(e)) => {
+                            // Error occurred
+                            error!("Failed to read from connection: {}", e);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        info!("Connection handler stopped");
     }
 }
