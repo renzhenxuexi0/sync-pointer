@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
 
-export async function localIp(): Promise<String> {
-  return invoke<String>('local_ip');
+export async function localIp(): Promise<string> {
+  return invoke<string>('local_ip');
 }

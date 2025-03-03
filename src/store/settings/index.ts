@@ -4,4 +4,3 @@ const settingsLocalStore = new LazyStore('settings.json');
 const devicesLocalStore = new LazyStore('devices.json');
 
 export { devicesLocalStore, settingsLocalStore };
-

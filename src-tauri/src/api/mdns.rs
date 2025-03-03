@@ -1,9 +1,9 @@
 use spdlog::error;
-use tauri::{Runtime, command};
+use tauri::Runtime;
 
 use crate::service::{client, server};
 
-#[command]
+#[tauri::command]
 pub async fn start_mdns_client() -> Result<(), String> {
     client::mdns::Mdns::instance().start().await.map_err(|e| {
         error!("Failed to start mdns client: {}", e);
@@ -11,7 +11,7 @@ pub async fn start_mdns_client() -> Result<(), String> {
     })
 }
 
-#[command]
+#[tauri::command]
 pub async fn stop_mdns_client() -> Result<(), String> {
     client::mdns::Mdns::instance().stop().await.map_err(|e| {
         error!("Failed to stop mdns client: {}", e);
@@ -19,7 +19,7 @@ pub async fn stop_mdns_client() -> Result<(), String> {
     })
 }
 
-#[command]
+#[tauri::command]
 pub async fn start_mdns_server() -> Result<(), String> {
     server::mdns::Mdns::instance().start().await.map_err(|e| {
         error!("Failed to start mdns server: {}", e);
@@ -27,7 +27,7 @@ pub async fn start_mdns_server() -> Result<(), String> {
     })
 }
 
-#[command]
+#[tauri::command]
 pub async fn stop_mdns_server() -> Result<(), String> {
     server::mdns::Mdns::instance().stop().await.map_err(|e| {
         error!("Failed to stop mdns server: {}", e);
@@ -35,7 +35,7 @@ pub async fn stop_mdns_server() -> Result<(), String> {
     })
 }
 
-#[command]
+#[tauri::command]
 pub async fn update_mdns_server_info<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,

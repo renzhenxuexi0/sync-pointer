@@ -6,7 +6,7 @@ import SettingsForm from '../components/SettingsForm';
 
 function SystemSettings() {
   const { t } = useTranslation();
-  const systemSettings = useSnapshot(systemSettingsStore);
+  const systemSettings = useSnapshot(systemSettingsStore.state);
   return (
     <SettingsForm
       initialValues={systemSettings}

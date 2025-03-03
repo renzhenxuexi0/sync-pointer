@@ -11,7 +11,6 @@ use crate::constant;
 
 use super::handle::Handle;
 
-#[derive(Default)]
 pub struct Tray {}
 
 impl Tray {
@@ -25,7 +24,8 @@ impl Tray {
     pub fn init(&self) -> Result<()> {
         let app_handle = Handle::instance().app_handle().unwrap();
         let tray_icon_id = TrayIconId::new(constant::TRAY_ICON_ID);
-        let tray = app_handle.tray_by_id(&tray_icon_id).unwrap();
+        let tray: tauri::tray::TrayIcon =
+            app_handle.tray_by_id(&tray_icon_id).unwrap();
         tray.on_tray_icon_event(|tray, event| {
             if let TrayIconEvent::Click {
                 button: MouseButton::Left,
@@ -44,14 +44,11 @@ impl Tray {
                 }
             }
         });
-
         Ok(())
     }
 
     /// 更新菜单
-    pub fn update_menu(&self) {
-        unimplemented!()
-    }
+    pub fn update_menu(&self) {}
 
     /// 更新提示
     pub fn update_tooltip(&self) {

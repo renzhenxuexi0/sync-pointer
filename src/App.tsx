@@ -20,7 +20,15 @@ const SystemSettings = lazy(() => import('@/pages/settings/system-settings'));
 
 // 加载提示组件
 const LoadingComponent = () => (
-  <div className="flex h-full w-full items-center justify-center">
+  <div
+    className={`
+      flex
+      h-full
+      w-full
+      items-center
+      justify-center
+    `}
+  >
     <Spin size="large" />
   </div>
 );
@@ -28,7 +36,7 @@ const LoadingComponent = () => (
 function App() {
   const { t } = useTranslation();
   const [location, setLocation] = useState('/');
-  const systemSettings = useSnapshot(systemSettingsStore);
+  const systemSettings = useSnapshot(systemSettingsStore.state);
 
   return (
     <ConfigProvider locale={systemSettings.locale === 'zh-CN' ? zhCN : enUS}>
@@ -132,7 +140,10 @@ function App() {
                       path="system"
                       element={<SystemSettings />}
                     />
-                    <Route path='network' element={<NetworkSettings/>}/>
+                    <Route
+                      path="network"
+                      element={<NetworkSettings />}
+                    />
                   </Route>
                 </Routes>
               </Suspense>

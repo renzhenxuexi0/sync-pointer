@@ -2349,6 +2349,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4805,7 +4814,7 @@ dependencies = [
  "tauri-plugin-os",
  "tauri-plugin-persisted-scope",
  "tauri-plugin-single-instance",
- "tauri-plugin-store",
+ "tauri-plugin-valtio",
  "tauri-plugin-window-state",
  "tokio",
  "tokio-util",
@@ -5199,18 +5208,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "tauri-plugin-store"
-version = "2.2.0"
+name = "tauri-plugin-valtio"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c0c08fae6995909f5e9a0da6038273b750221319f2c0f3b526d6de1cde21505"
+checksum = "b04f9e001956ca4d4ab9cb57cb4f0d8fb0949ba1a03a13591d2215653b988691"
 dependencies = [
- "dunce",
  "serde",
- "serde_json",
  "tauri",
  "tauri-plugin",
- "thiserror 2.0.11",
- "tokio",
+ "tauri-store",
  "tracing",
 ]
 
@@ -5273,6 +5279,49 @@ dependencies = [
  "webview2-com",
  "windows 0.58.0",
  "wry",
+]
+
+[[package]]
+name = "tauri-store"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb4e7c0776d9f8b54fd4788f4e471ce83b4c6cf62079799830a3735582a51fc4"
+dependencies = [
+ "dashmap",
+ "futures",
+ "itertools 0.14.0",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-store-macros",
+ "tauri-store-utils",
+ "thiserror 2.0.11",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "tauri-store-macros"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fabed02238bc887f75887b315c6a14d9571ab463c1a188cc27ec2f7e917b06c3"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.98",
+]
+
+[[package]]
+name = "tauri-store-utils"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b983a259b22d622ce74b957140efa161bd75c6bfd47b7bf621c98dd05b1a2474"
+dependencies = [
+ "futures",
+ "tauri",
+ "thiserror 2.0.11",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]

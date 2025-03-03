@@ -8,7 +8,7 @@ import DeviceGrid from './components/DeviceGrid';
 
 function ScreenLayout() {
   const { t } = useTranslation();
-  const networkSettings = useSnapshot(networkSettingsStore);
+  const networkSettings = useSnapshot(networkSettingsStore.state);
   const mouseSensor = useSensor(MouseSensor);
 
   const sensors = useSensors(mouseSensor);

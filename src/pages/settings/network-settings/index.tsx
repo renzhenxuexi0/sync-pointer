@@ -6,7 +6,7 @@ import SettingsForm from '../components/SettingsForm';
 
 function NetworkSettings() {
   const { t } = useTranslation();
-  const networkSettings = useSnapshot(networkSettingsStore);
+  const networkSettings = useSnapshot(networkSettingsStore.state);
   return (
     <SettingsForm
       initialValues={networkSettings}

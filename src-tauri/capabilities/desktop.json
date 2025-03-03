@@ -16,7 +16,6 @@
     "core:app:allow-set-app-theme",
     "core:window:allow-set-theme",
     "core:window:allow-theme",
-    "store:default",
     "fs:default",
     "os:default",
     "os:allow-hostname",
@@ -31,6 +30,7 @@
           "url": "https://github.com/renzhenxuexi0/sync-pointer"
         }
       ]
-    }
+    },
+    "valtio:default"
   ]
 }

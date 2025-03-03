@@ -1,6 +1,6 @@
-use tauri::{Runtime, command};
+use tauri::Runtime;
 
-#[command]
+#[tauri::command]
 pub fn trace<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
@@ -9,7 +9,7 @@ pub fn trace<R: Runtime>(
     spdlog::trace!("{}", message);
 }
 
-#[command]
+#[tauri::command]
 pub fn debug<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
@@ -18,7 +18,7 @@ pub fn debug<R: Runtime>(
     spdlog::debug!("{}", message);
 }
 
-#[command]
+#[tauri::command]
 pub fn info<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
@@ -27,7 +27,7 @@ pub fn info<R: Runtime>(
     spdlog::info!("{}", message);
 }
 
-#[command]
+#[tauri::command]
 pub fn warn<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
@@ -36,7 +36,7 @@ pub fn warn<R: Runtime>(
     spdlog::warn!("{}", message);
 }
 
-#[command]
+#[tauri::command]
 pub fn error<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,

@@ -1,13 +1,15 @@
-#[macro_use]
-extern crate rust_i18n;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_autostart::MacosLauncher;
+use tauri_plugin_valtio::ManagerExt;
 
 pub mod api;
 pub mod config;
 pub mod constant;
 pub mod core;
 pub mod service;
+
+#[macro_use]
+extern crate rust_i18n;
 
 i18n!("locales", fallback = "zh-CN");
 
@@ -21,6 +23,9 @@ pub fn run() {
         config::log::init(app.path().app_log_dir()?)?;
         core::handle::Handle::instance().init(app.handle());
         core::tray::Tray::instance().init()?;
+        // 设置应用数据目录
+        let app_data_dir = app.path().app_data_dir()?;
+        app.handle().valtio().set_path(app_data_dir.join("store"))?;
         Ok(())
     });
 
@@ -30,7 +35,7 @@ pub fn run() {
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_valtio::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_persisted_scope::init())
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {

@@ -1,6 +1,4 @@
-import { subscribe } from 'valtio';
-import { proxyMap, proxySet } from 'valtio/utils';
-import { devicesLocalStore } from '../settings';
+import { State, store } from 'tauri-plugin-valtio';
 import { networkSettingsStore } from '../settings/network';
 
 const KEY = 'devices';
@@ -17,6 +15,11 @@ interface Device {
   status: 'online' | 'offline';
 }
 
+export interface DevicesState extends State {
+  devices: Record<string, Device>;
+  enableCells: Set<number>;
+}
+
 // 生成位置key
 const createPositionKey = (row: number, col: number) => `${row}-${col}`;
 // 解析位置key
@@ -25,85 +28,85 @@ const parsePositionKey = (key: string): [number, number] => {
   return [row, col];
 };
 
-// 初始状态
-const initialDevicesMap = new Map<string, Device>();
-
-const devicesStore = proxyMap(initialDevicesMap);
-const enableCellsStore = proxySet(new Set<number>());
+const devicesStore = store(
+  KEY,
+  {
+    devices: {},
+    enableCells: new Set<number>(),
+  } as DevicesState,
+  {
+    saveOnChange: true,
+    saveOnExit: true,
+  },
+);
 
 async function initDevices() {
-  const devices = new Map(
-    Object.entries((await devicesLocalStore.get(KEY)) as Record<string, Device>),
-  );
-  if (devices === undefined || devices.size === 0) {
-    devicesStore.set(createPositionKey(2, 2), {
+  await devicesStore.start();
+
+  // If devices is empty, initialize with current device
+  if (Object.keys(devicesStore.state.devices).length === 0) {
+    const positionKey = createPositionKey(2, 2);
+    devicesStore.state.devices[positionKey] = {
       row: 2,
       col: 2,
-      hostname: networkSettingsStore.hostname,
-      ip: networkSettingsStore.ip,
-      tcp_port: networkSettingsStore.tcpPort,
-      mdns_port: networkSettingsStore.mdnsPort,
-      serviceType: networkSettingsStore.serviceType,
+      hostname: networkSettingsStore.state.hostname,
+      ip: networkSettingsStore.state.ip,
+      tcp_port: networkSettingsStore.state.tcpPort,
+      mdns_port: networkSettingsStore.state.mdnsPort,
+      serviceType: networkSettingsStore.state.serviceType,
       isMe: true,
       status: 'online',
-    });
-  } else {
-    devices.forEach((value, key) => {
-      devicesStore.set(key, value);
-    });
+    };
   }
 
   initEnableCells();
 }
 
 const initEnableCells = () => {
-  enableCellsStore.clear();
-  devicesStore.forEach((device) => {
+  const enableCells: number[] = [];
+
+  Object.values(devicesStore.state.devices).forEach((device) => {
     const col = device.col;
     const row = device.row;
-    enableCellsStore.add(row * 5 + col);
+    enableCells.push(row * 5 + col);
     // 上
-    if (row > 0) enableCellsStore.add((row - 1) * 5 + col);
+    if (row > 0) enableCells.push((row - 1) * 5 + col);
     // 下
-    if (row < 4) enableCellsStore.add((row + 1) * 5 + col);
+    if (row < 4) enableCells.push((row + 1) * 5 + col);
     // 左
-    if (col > 0) enableCellsStore.add(row * 5 + col - 1);
+    if (col > 0) enableCells.push(row * 5 + col - 1);
     // 右
-    if (col < 4) enableCellsStore.add(row * 5 + col + 1);
+    if (col < 4) enableCells.push(row * 5 + col + 1);
   });
+
+  // Use Set to remove duplicates
+  devicesStore.state.enableCells = new Set(enableCells);
 };
 
 const swapDevicePosition = (fromKey: string, toKey: string) => {
   if (fromKey === toKey) return;
-  const from = devicesStore.get(fromKey);
-  const to = devicesStore.get(toKey);
-
-  if (!from) return;
+  const from = devicesStore.state.devices[fromKey];
+  const to = devicesStore.state.devices[toKey];
 
   if (!to) {
     // 移动到空位置
     const [toRow, toCol] = parsePositionKey(toKey);
-    devicesStore.delete(fromKey);
-    devicesStore.set(toKey, { ...from, row: toRow, col: toCol });
+    // devicesStore.state.devices.delete(fromKey);
+    // devicesStore.set(toKey, { ...from, row: toRow, col: toCol });
+    devicesStore.state.devices[toKey] = { ...from, row: toRow, col: toCol };
+    delete devicesStore.state.devices[fromKey];
   } else {
     // 替换位置
-    devicesStore.set(fromKey, { ...to, row: from.row, col: from.col });
-    devicesStore.set(toKey, { ...from, row: to.row, col: to.col });
+    devicesStore.state.devices = {
+      ...devicesStore.state.devices,
+      [fromKey]: { ...to, row: from.row, col: from.col },
+      [toKey]: { ...from, row: to.row, col: to.col },
+    };
   }
-};
+  devicesStore.state.devices[toKey] = { ...from, row: to.row, col: to.col };
 
-// 订阅 store 变化，持久化到本地
-subscribe(devicesStore, () => {
-  devicesLocalStore.set(KEY, devicesStore);
   initEnableCells();
-});
-
-export {
-  createPositionKey,
-  devicesStore,
-  enableCellsStore,
-  initDevices,
-  parsePositionKey,
-  swapDevicePosition,
 };
+
+export { createPositionKey, devicesStore, initDevices, parsePositionKey, swapDevicePosition };
 export type { Device };

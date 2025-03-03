@@ -1,4 +1,4 @@
-import { createPositionKey, Device, devicesStore, enableCellsStore } from '@/store/devices';
+import { createPositionKey, Device, devicesStore } from '@/store/devices';
 import { useDroppable } from '@dnd-kit/core';
 import { useSnapshot } from 'valtio';
 import DeviceCell from './DeviceCell';
@@ -30,14 +30,14 @@ function gridCell(cell: GirdCell, device?: Device) {
         border
         border-slate-200
         bg-slate-300
-        dark:border-slate-700
-        dark:bg-slate-900
-        lg:h-24
-        lg:w-32
-        md:h-18
-        md:w-24
         sm:h-12
         sm:w-16
+        md:h-18
+        md:w-24
+        lg:h-24
+        lg:w-32
+        dark:border-slate-700
+        dark:bg-slate-900
         ${extendClassName}
       `}
     >
@@ -47,8 +47,7 @@ function gridCell(cell: GirdCell, device?: Device) {
 }
 
 function DeviceGrid() {
-  const devices = useSnapshot(devicesStore);
-  const enableCells = useSnapshot(enableCellsStore);
+  const state = useSnapshot(devicesStore.state);
   return (
     <div
       className={`
@@ -59,12 +58,12 @@ function DeviceGrid() {
       {Array.from({ length: 25 }).map((_, index) => {
         const row = Math.floor(index / 5);
         const col = index % 5;
-        const device = devices.get(createPositionKey(row, col));
+        const device = state.devices[createPositionKey(row, col)];
         return gridCell(
           {
             row,
             col,
-            disabled: !enableCells.has(index),
+            disabled: !state.enableCells.has(index),
           },
           device,
         );
