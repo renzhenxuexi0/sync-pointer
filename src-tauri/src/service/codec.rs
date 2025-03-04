@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, mem::size_of, ops::Deref};
+use std::{marker::PhantomData, ops::Deref};
 
 use anyhow::anyhow;
 use futures_util::stream::{SplitSink, SplitStream};

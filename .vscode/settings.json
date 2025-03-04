@@ -18,5 +18,6 @@
   "rust-analyzer.check.command": "clippy",
   "i18n-ally.keystyle": "nested",
   "i18n-ally.dirStructure": "auto",
-  "i18n-ally.displayLanguage": "zh-CN"
+  "i18n-ally.displayLanguage": "zh-CN",
+  "commentTranslate.targetLanguage": "zh-CN"
 }

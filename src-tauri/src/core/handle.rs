@@ -8,17 +8,14 @@ use crate::constant;
 #[derive(Debug, Default, Clone)]
 pub struct Handle {
     pub app_handle: Arc<RwLock<Option<AppHandle>>>,
-    pub is_exiting: Arc<RwLock<bool>>,
 }
 
 impl Handle {
     pub fn instance() -> &'static Handle {
         static HANDLE: OnceLock<Handle> = OnceLock::new();
 
-        HANDLE.get_or_init(|| Handle {
-            app_handle: Arc::new(RwLock::new(None)),
-            is_exiting: Arc::new(RwLock::new(false)),
-        })
+        HANDLE
+            .get_or_init(|| Handle { app_handle: Arc::new(RwLock::new(None)) })
     }
 
     pub fn init(&self, app_handle: &AppHandle) {
@@ -38,14 +35,5 @@ impl Handle {
             debug!("main window not found");
         }
         window
-    }
-
-    pub fn set_is_exiting(&self) {
-        let mut is_exiting = self.is_exiting.write();
-        *is_exiting = true;
-    }
-
-    pub fn is_exiting(&self) -> bool {
-        *self.is_exiting.read()
     }
 }
