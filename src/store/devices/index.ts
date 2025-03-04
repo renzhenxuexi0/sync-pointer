@@ -91,8 +91,6 @@ const swapDevicePosition = (fromKey: string, toKey: string) => {
   if (!to) {
     // 移动到空位置
     const [toRow, toCol] = parsePositionKey(toKey);
-    // devicesStore.state.devices.delete(fromKey);
-    // devicesStore.set(toKey, { ...from, row: toRow, col: toCol });
     devicesStore.state.devices[toKey] = { ...from, row: toRow, col: toCol };
     delete devicesStore.state.devices[fromKey];
   } else {
@@ -103,9 +101,10 @@ const swapDevicePosition = (fromKey: string, toKey: string) => {
       [toKey]: { ...from, row: to.row, col: to.col },
     };
   }
-  devicesStore.state.devices[toKey] = { ...from, row: to.row, col: to.col };
 
-  initEnableCells();
+  if (Object.keys(devicesStore.state.devices).length > 1) {
+    initEnableCells();
+  }
 };
 
 export { createPositionKey, devicesStore, initDevices, parsePositionKey, swapDevicePosition };

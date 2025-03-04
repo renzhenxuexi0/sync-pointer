@@ -16,3 +16,12 @@ pub const DEFAULT_CLIENT_RETRY_COUNT: u32 = 5;
 pub const DEFAULT_CONNECTION_TIMEOUT_SECONDS: u64 = 10;
 /// 心跳间隔（秒）
 pub const DEFAULT_HEARTBEAT_INTERVAL_SECONDS: u64 = 5;
+
+/// quit 菜单按钮id
+pub const MENU_ITEM_ID_QUIT: &str = "Quit";
+/// restart 菜单按钮id
+pub const MENU_ITEM_ID_RESTART: &str = "Restart";
+/// screen-layout 菜单按钮id
+pub const MENU_ITEM_ID_SCREEN_LAYOUT: &str = "ScreenLayout";
+/// settings 菜单按钮id
+pub const MENU_ITEM_ID_SETTINGS: &str = "Settings";

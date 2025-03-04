@@ -1,6 +1,9 @@
 _version: 1
 menu:
   quit: "退出"
+  restart: "重启"
+  screen-layout: "屏幕布局"
+  settings: "设置"
 
 connection:
   connect-request-dialog:

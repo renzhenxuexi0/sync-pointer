@@ -63,7 +63,8 @@ function DeviceGrid() {
           {
             row,
             col,
-            disabled: !state.enableCells.has(index),
+            // 如果只有一个设备那么哪里都可以移动
+            disabled: !state.enableCells.has(index) && Object.keys(state.devices).length > 1,
           },
           device,
         );
