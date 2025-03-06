@@ -32,6 +32,9 @@ impl TcpClient {
     }
 
     pub async fn start(&self, server_info: ServerInfo) -> Result<()> {
+        if self.is_running() {
+            self.stop().await?;
+        }
         let writer = self.writer.clone();
         let tcp_start_logic =
             move |rx: oneshot::Receiver<bool>| -> Result<JoinHandle<()>> {
@@ -45,7 +48,7 @@ impl TcpClient {
                             stream
                         }
                         Err(e) => {
-                            error!("Failed to connect to server: {}", e);
+                            error!("addr:{} Failed to connect to server: {}",server_addr, e);
                             return;
                         }
                     };

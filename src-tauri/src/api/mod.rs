@@ -1,4 +1,3 @@
-pub mod connection;
 pub mod log;
-pub mod mdns;
+pub mod service;
 pub mod sys;

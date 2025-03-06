@@ -1,21 +1,21 @@
 import { invoke } from '@tauri-apps/api/core';
 
 export async function trace(message: string): Promise<void> {
-  await invoke<void>('trace', { message });
+  await invoke('trace', { message });
 }
 
 export async function debug(message: string): Promise<void> {
-  await invoke<void>('debug', { message });
+  await invoke('debug', { message });
 }
 
 export async function info(message: string): Promise<void> {
-  await invoke<void>('info', { message });
+  await invoke('info', { message });
 }
 
 export async function warn(message: string): Promise<void> {
-  await invoke<void>('warn', { message });
+  await invoke('warn', { message });
 }
 
 export async function error(message: string): Promise<void> {
-  await invoke<void>('error', { message });
+  await invoke('error', { message });
 }

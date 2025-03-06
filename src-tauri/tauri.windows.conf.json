@@ -15,7 +15,11 @@
                     "SimpChinese",
                     "English"
                 ],
-                "installMode": "perMachine",
+                "customLanguageFiles": {
+                    "SimpChinese": "./windows/languages/SimpChinese.nsh",
+                    "English": "./windows/languages/English.nsi"
+                },
+                "installMode": "both",
                 "installerHooks": "./windows/hook.nsi"
             },
             "certificateThumbprint": null,

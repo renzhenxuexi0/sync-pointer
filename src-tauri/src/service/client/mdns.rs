@@ -11,14 +11,14 @@ use crate::{
 
 use super::ServerInfo;
 
-pub struct Mdns {
+pub struct MdnsClient {
     service_control: ServiceControl,
 }
 
-impl Mdns {
+impl MdnsClient {
     pub fn instance() -> &'static Self {
-        static MDNS: OnceLock<Mdns> = OnceLock::new();
-        MDNS.get_or_init(|| Mdns {
+        static MDNS: OnceLock<MdnsClient> = OnceLock::new();
+        MDNS.get_or_init(|| MdnsClient {
             service_control: ServiceControl::new("Mdns Client".to_string()),
         })
     }
@@ -90,7 +90,7 @@ impl Mdns {
                     {
                         Ok(_) => {
                             // 关闭mdns
-                            let mdns = Mdns::instance();
+                            let mdns = MdnsClient::instance();
                             mdns.stop().await.ok();
                         }
                         Err(e) => {
@@ -163,15 +163,15 @@ mod tests {
 
     #[tokio::test]
     async fn test_mdns_singleton() {
-        let instance1 = Mdns::instance();
-        let instance2 = Mdns::instance();
+        let instance1 = MdnsClient::instance();
+        let instance2 = MdnsClient::instance();
         assert!(std::ptr::eq(instance1, instance2));
     }
 
     #[tokio::test]
     async fn test_start_stop() -> Result<()> {
         spdlog::default_logger().set_level_filter(spdlog::LevelFilter::All);
-        let mdns = Mdns::instance();
+        let mdns = MdnsClient::instance();
         mdns.start().await?;
         assert!(mdns.is_running());
 

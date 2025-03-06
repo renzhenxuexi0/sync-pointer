@@ -58,12 +58,11 @@ pub fn run() {
             api::log::info,
             api::log::warn,
             api::log::error,
-            // mdns
-            api::mdns::start_mdns_client,
-            api::mdns::stop_mdns_client,
-            api::mdns::start_mdns_server,
-            api::mdns::stop_mdns_server,
-            api::mdns::update_mdns_server_info,
+            // service
+            api::service::start_service,
+            api::service::stop_service,
+            api::service::handle_service_type_change,
+            api::service::update_server_info,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

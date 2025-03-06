@@ -112,6 +112,7 @@ impl TcpServer {
                     }
                 }
 
+                drop(listener);
                 info!("TCP server stopped");
             });
             Ok(task)
@@ -122,6 +123,21 @@ impl TcpServer {
 
     // Stop server
     pub async fn stop(&self) -> Result<()> {
+        // 停止所有会话
+        for session_key in
+            self.sessions().iter().map(|s| s.key().clone()).collect::<Vec<_>>()
+        {
+            if let Some(mut session) = self.sessions().get_mut(&session_key) {
+                let r = session.shutdown().await;
+                if r.is_err() {
+                    error!(
+                        "addr: {} Failed to shutdown session: {}",
+                        session_key,
+                        r.unwrap_err()
+                    );
+                }
+            }
+        }
         self.service_control.stop().await
     }
 }

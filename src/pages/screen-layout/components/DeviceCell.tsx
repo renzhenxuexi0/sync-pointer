@@ -29,7 +29,7 @@ function DeviceCell({ device }: { device: Device }) {
             {t('screen-layout.device-cell.ip')}: {device.ip}
           </div>
           <div>
-            {t('screen-layout.device-cell.port')}: {device.port}
+            {t('screen-layout.device-cell.port')}: {device.tcp_port}
           </div>
           <div>
             {t('screen-layout.device-cell.service-type')}: {device.serviceType}
@@ -63,18 +63,18 @@ function DeviceCell({ device }: { device: Device }) {
           <Connected
             className={`
               cursor-grab
-              lg:size-20
-              md:size-12
               sm:size-10
+              md:size-12
+              lg:size-20
             `}
           />
         ) : (
           <Disconnected
             className={`
               cursor-grab
-              lg:size-20
-              md:size-12
               sm:size-10
+              md:size-12
+              lg:size-20
             `}
           />
         )}

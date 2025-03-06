@@ -7,17 +7,17 @@ use tokio::{sync::oneshot, task::JoinHandle};
 use crate::{constant, service::ServiceControl};
 
 #[derive(Debug)]
-pub struct Mdns {
+pub struct MdnsServer {
     service_control: ServiceControl,
     host: Arc<RwLock<String>>,
     mdns_port: Arc<RwLock<u16>>,
     tcp_port: Arc<RwLock<u16>>,
 }
 
-impl Mdns {
+impl MdnsServer {
     pub fn instance() -> &'static Self {
-        static MDNS: OnceLock<Mdns> = OnceLock::new();
-        MDNS.get_or_init(|| Mdns {
+        static MDNS: OnceLock<MdnsServer> = OnceLock::new();
+        MDNS.get_or_init(|| MdnsServer {
             service_control: ServiceControl::new("Mdns Server".to_string()),
             host: Arc::new(RwLock::new(hostname())),
             mdns_port: Arc::new(RwLock::new(constant::DEFAULT_MDNS_PORT)),
@@ -60,7 +60,7 @@ impl Mdns {
         }
 
         if self.is_running() {
-            let mdns = Mdns::instance();
+            let mdns = MdnsServer::instance();
             mdns.stop().await?;
             mdns.start().await?;
         }

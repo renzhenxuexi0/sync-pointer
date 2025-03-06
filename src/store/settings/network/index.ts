@@ -1,10 +1,4 @@
-import {
-  startMdnsClient,
-  startMdnsServer,
-  stopMdnsClient,
-  stopMdnsServer,
-  updateMdnsServerInfo,
-} from '@/api/mdns';
+import { handleServiceTypeChange, startService, updateServerInfo } from '@/api/service';
 import { localIp } from '@/api/sys';
 import { hostname } from '@tauri-apps/plugin-os';
 import { State, store } from 'tauri-plugin-valtio';
@@ -50,17 +44,13 @@ async function initNetworkSettings() {
 
   networkSettingsStore.state.ip = ip || networkSettingsStore.state.ip || '';
 
-  await updateMdnsServerInfo({
+  await updateServerInfo({
     host: networkSettingsStore.state.hostname,
     mdnsPort: networkSettingsStore.state.mdnsPort,
     tcpPort: networkSettingsStore.state.tcpPort,
   });
-
-  if (networkSettingsStore.state.serviceType === 'server') {
-    await startMdnsServer();
-  } else {
-    await startMdnsClient();
-  }
+  // 启动服务
+  await startService(networkSettingsStore.state.serviceType);
 }
 
 async function updateNetworkSettings(networkSettings: Partial<NetworkSettings>) {
@@ -88,7 +78,7 @@ async function updateNetworkSettings(networkSettings: Partial<NetworkSettings>) 
   }
 
   if (isNeedUpdate) {
-    updateMdnsServerInfo({
+    updateServerInfo({
       host: networkSettingsStore.state.hostname,
       mdnsPort: networkSettingsStore.state.mdnsPort,
       tcpPort: networkSettingsStore.state.tcpPort,
@@ -100,18 +90,7 @@ async function updateNetworkSettings(networkSettings: Partial<NetworkSettings>) 
     networkSettings.serviceType !== networkSettingsStore.state.serviceType
   ) {
     networkSettingsStore.state.serviceType = networkSettings.serviceType;
-
-    if (networkSettings.serviceType === 'server') {
-      // 关闭客户端
-      await stopMdnsClient();
-      // 开启服务端
-      await startMdnsServer();
-    } else {
-      // 关闭服务端
-      await stopMdnsServer();
-      // 开启客户端
-      await startMdnsClient();
-    }
+    await handleServiceTypeChange(networkSettingsStore.state.serviceType);
   }
 }
 
