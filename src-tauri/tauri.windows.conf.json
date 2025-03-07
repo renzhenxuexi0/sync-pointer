@@ -17,7 +17,7 @@
                 ],
                 "customLanguageFiles": {
                     "SimpChinese": "./windows/languages/SimpChinese.nsh",
-                    "English": "./windows/languages/English.nsi"
+                    "English": "./windows/languages/English.nsh"
                 },
                 "installMode": "both",
                 "installerHooks": "./windows/hook.nsi"

@@ -76,6 +76,11 @@ impl MdnsServer {
         let mdns_start_logic =
             move |rx: oneshot::Receiver<bool>| -> Result<JoinHandle<()>> {
                 let daemon = mdns_sd::ServiceDaemon::new()?;
+                #[cfg(not(target_os = "windows"))]
+                {
+                    daemon.set_multicast_loop_v4(false)?;
+                    daemon.set_multicast_loop_v6(false)?;
+                }
                 let mut properties = std::collections::HashMap::new();
                 properties.insert("tcp_port".to_string(), tcp_port.to_string());
                 let service_info = mdns_sd::ServiceInfo::new(

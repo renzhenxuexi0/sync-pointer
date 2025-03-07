@@ -14,7 +14,6 @@ extern crate rust_i18n;
 i18n!("locales", fallback = "zh-CN");
 
 #[allow(deprecated)]
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[cfg(debug_assertions)]
     let devtools = tauri_plugin_devtools::init();
@@ -60,7 +59,6 @@ pub fn run() {
             api::log::error,
             // service
             api::service::start_service,
-            api::service::stop_service,
             api::service::handle_service_type_change,
             api::service::update_server_info,
         ])

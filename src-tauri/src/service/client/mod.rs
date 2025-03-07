@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
-
 pub mod mdns;
 pub mod tcp;
 
-/// 从mdns属性解析出用于连接服务端
+/// 从mdns属性解析出用于连接服务端的配置信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServerInfo {
     /// 主机名

@@ -18,21 +18,10 @@ pub async fn start_service(service_type: String) -> Result<(), String> {
         })?;
     } else {
         client::mdns::MdnsClient::instance().start().await.map_err(|e| {
-            error!("Failed to start mdns client: {}", e);
+            error!("Failed to start client service: {}", e);
             e.to_string()
         })?;
     }
-
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn stop_service() -> Result<(), String> {
-    // 停止所有服务，无论当前是什么模式
-    let _ = client::mdns::MdnsClient::instance().stop().await;
-    let _ = server::mdns::MdnsServer::instance().stop().await;
-    let _ = server::tcp::TcpServer::instance().stop().await;
-    let _ = client::tcp::TcpClient::instance().stop().await;
 
     Ok(())
 }
@@ -45,6 +34,14 @@ pub async fn handle_service_type_change(
 
     // 根据新类型启动服务
     if service_type == "server" {
+        client::mdns::MdnsClient::instance().stop().await.map_err(|e| {
+            error!("Failed to stop client service: {}", e);
+            e.to_string()
+        })?;
+        client::tcp::TcpClient::instance().stop().await.map_err(|e| {
+            error!("Failed to stop tcp client: {}", e);
+            e.to_string()
+        })?;
         server::mdns::MdnsServer::instance().start().await.map_err(|e| {
             error!("Failed to start mdns server: {}", e);
             e.to_string()
@@ -55,8 +52,17 @@ pub async fn handle_service_type_change(
             e.to_string()
         })?;
     } else {
+        server::mdns::MdnsServer::instance().stop().await.map_err(|e| {
+            error!("Failed to stop mdns server: {}", e);
+            e.to_string()
+        })?;
+
+        server::tcp::TcpServer::instance().stop().await.map_err(|e| {
+            error!("Failed to stop tcp server: {}", e);
+            e.to_string()
+        })?;
         client::mdns::MdnsClient::instance().start().await.map_err(|e| {
-            error!("Failed to start mdns client: {}", e);
+            error!("Failed to start client service: {}", e);
             e.to_string()
         })?;
     }

@@ -9,14 +9,6 @@ export async function startService(serviceType: 'client' | 'server'): Promise<vo
 }
 
 /**
- * 停止所有服务
- * @returns Promise<void>
- */
-export async function stopService(): Promise<void> {
-  return invoke('stop_service');
-}
-
-/**
  * 切换服务类型并重启服务
  * @param serviceType 'server' | 'client'
  * @returns Promise<void>

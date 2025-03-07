@@ -69,7 +69,7 @@ impl TcpServer {
 
         let tcp_start_logic = move |mut rx: oneshot::Receiver<bool>| {
             let task = tokio::spawn(async move {
-                let addr = format!("127.0.0.1:{}", port);
+                let addr = format!("0.0.0.0:{}", port);
                 let listener = match TcpListener::bind(&addr).await {
                     Ok(listener) => listener,
                     Err(e) => {

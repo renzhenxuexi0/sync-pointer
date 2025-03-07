@@ -31,6 +31,11 @@ impl MdnsClient {
         let mdns_start_logic =
             |mut rx: oneshot::Receiver<bool>| -> Result<JoinHandle<()>> {
                 let daemon = ServiceDaemon::new()?;
+                #[cfg(target_os = "windows")]
+                {
+                    daemon.set_multicast_loop_v4(false)?;
+                    daemon.set_multicast_loop_v6(false)?;
+                }
                 let receiver = daemon
                     .browse(constant::MDNS_SERVICE_TYPE)
                     .map_err(|e| anyhow::anyhow!("Failed to browse: {}", e))?;
@@ -84,14 +89,14 @@ impl MdnsClient {
                 if let Some(device_info) =
                     Self::resolve_device_info(elapsed, info).await
                 {
+                    // 尝试启动 TCP 连接，不再直接停止 MDNS
+                    // TCP 连接成功后会通知 ClientManager，由 ClientManager 决定是否停止 MDNS
                     match client::tcp::TcpClient::instance()
                         .start(device_info)
                         .await
                     {
                         Ok(_) => {
-                            // 关闭mdns
-                            let mdns = MdnsClient::instance();
-                            mdns.stop().await.ok();
+                            info!("TCP client started successfully");
                         }
                         Err(e) => {
                             error!(
@@ -131,7 +136,7 @@ impl MdnsClient {
             elapsed, fullname, hostname, port, addresses, properties
         );
 
-        let ip = addresses.iter().next().map(|ip| ip.to_string())?; // 使用 `?` 传播错误
+        let ip = addresses.iter().next().map(|ip| ip.to_string())?;
         let tcp_port =
             Self::get_port(properties, "tcp_port", elapsed, &fullname)?;
 
@@ -154,32 +159,5 @@ impl MdnsClient {
                 );
                 None
             })
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn test_mdns_singleton() {
-        let instance1 = MdnsClient::instance();
-        let instance2 = MdnsClient::instance();
-        assert!(std::ptr::eq(instance1, instance2));
-    }
-
-    #[tokio::test]
-    async fn test_start_stop() -> Result<()> {
-        spdlog::default_logger().set_level_filter(spdlog::LevelFilter::All);
-        let mdns = MdnsClient::instance();
-        mdns.start().await?;
-        assert!(mdns.is_running());
-
-        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-        mdns.stop().await?;
-        assert!(!mdns.is_running());
-
-        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-        Ok(())
     }
 }

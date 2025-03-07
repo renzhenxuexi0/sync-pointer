@@ -13,10 +13,10 @@
     "windows": [
       {
         "title": "sync-pointer",
-        "width": 600,
-        "height": 400,
-        "minHeight": 400,
-        "minWidth": 600,
+        "width": 700,
+        "height": 600,
+        "minHeight": 600,
+        "minWidth": 700,
         "titleBarStyle": "Overlay"
       }
     ],
