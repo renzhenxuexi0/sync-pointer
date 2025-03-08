@@ -7,6 +7,7 @@ pub mod config;
 pub mod constant;
 pub mod core;
 pub mod service;
+pub mod util;
 
 #[macro_use]
 extern crate rust_i18n;
@@ -51,6 +52,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             // sys
             api::sys::local_ip,
+            // util
+            api::util::generate_uuid,
             // log
             api::log::trace,
             api::log::debug,

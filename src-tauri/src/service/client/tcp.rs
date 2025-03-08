@@ -1,5 +1,5 @@
 use anyhow::Result;
-use futures_util::StreamExt;
+use futures_util::{SinkExt as _, StreamExt};
 use parking_lot::RwLock;
 use spdlog::{error, info};
 use std::sync::{Arc, OnceLock};
@@ -11,10 +11,14 @@ use tokio::{
 };
 use tokio_util::codec::Framed;
 
-use crate::service::{
-    ServiceControl,
-    client::mdns::MdnsClient,
-    codec::{DataPacketCodec, DataPacketReader, DataPacketWriter},
+use crate::{
+    config,
+    service::{
+        ServiceControl,
+        client::mdns::MdnsClient,
+        codec::{DataPacketCodec, DataPacketReader, DataPacketWriter},
+        protocols::base::{DataPacket, PacketData},
+    },
 };
 
 use super::ServerInfo;
@@ -31,9 +35,9 @@ pub enum ConnectionState {
 }
 
 pub struct TcpClient {
-    writer: Arc<RwLock<Option<DataPacketWriter>>>,
     service_control: ServiceControl,
     state_tx: mpsc::Sender<ConnectionState>,
+    connection_state: Arc<RwLock<ConnectionState>>,
 }
 
 impl TcpClient {
@@ -46,9 +50,11 @@ impl TcpClient {
             tokio::spawn(Self::handle_state_changes(rx));
 
             TcpClient {
-                writer: Arc::new(RwLock::new(None)),
                 service_control: ServiceControl::new("Tcp Client".to_string()),
                 state_tx: tx,
+                connection_state: Arc::new(RwLock::new(
+                    ConnectionState::Disconnected,
+                )),
             }
         })
     }
@@ -57,23 +63,31 @@ impl TcpClient {
         self.service_control.is_running()
     }
 
+    fn update_connection_state(&self, state: ConnectionState) {
+        let mut connection_state_guard = self.connection_state.write();
+        *connection_state_guard = state;
+    }
+
     // 处理状态变化的后台任务
     async fn handle_state_changes(mut rx: mpsc::Receiver<ConnectionState>) {
         while let Some(state) = rx.recv().await {
-            match state {
+            match state.clone() {
                 ConnectionState::Connected => {
+                    Self::instance().update_connection_state(state);
                     info!("State change: Connected");
                     if let Err(e) = MdnsClient::instance().stop().await {
                         error!("Failed to stop mdns after connection: {}", e);
                     }
                 }
                 ConnectionState::Disconnected => {
+                    Self::instance().update_connection_state(state);
                     info!("State change: Disconnected");
                     if let Err(e) = MdnsClient::instance().start().await {
                         error!("Failed to restart after disconnection: {}", e);
                     }
                 }
                 ConnectionState::Error(e) => {
+                    Self::instance().update_connection_state(state);
                     info!("State change: Error - {}", e);
                     if let Err(e) = MdnsClient::instance().start().await {
                         error!("Failed to restart after error: {}", e);
@@ -87,7 +101,6 @@ impl TcpClient {
         if self.is_running() {
             self.stop().await?;
         }
-        let writer = self.writer.clone();
         let server_info = Arc::new(server_info);
         let state_tx = self.state_tx.clone();
 
@@ -103,11 +116,7 @@ impl TcpClient {
                             info!("Connected to server: {}", server_addr);
                             let framed =
                                 Framed::new(stream, DataPacketCodec::default());
-                            let (split_writer, reader) = framed.split();
-                            {
-                                let mut writer_guard = writer.write();
-                                *writer_guard = Some(split_writer);
-                            }
+                            let (writer, reader) = framed.split();
 
                             // 发送连接成功状态
                             if let Err(e) =
@@ -116,22 +125,15 @@ impl TcpClient {
                                 error!("Failed to send connected state: {}", e);
                             }
 
-                            // 开始处理连接
-                            let state = Self::handle_connection(
-                                reader,
-                                rx,
-                                &server_info,
-                            )
-                            .await;
+                            // 阻塞监听消息
+                            let state =
+                                Self::handle(reader, writer, rx, &server_info)
+                                    .await;
 
                             // 发送连接状态变化
                             if let Err(e) = state_tx.send(state).await {
                                 error!("Failed to send state change: {}", e);
                             }
-
-                            // 清理 writer
-                            let mut writer_guard = writer.write();
-                            *writer_guard = None;
                         }
                         Err(e) => {
                             error!(
@@ -159,25 +161,33 @@ impl TcpClient {
     }
 
     pub async fn stop(&self) -> Result<()> {
-        // 清理 writer
-        {
-            let mut writer_guard = self.writer.write();
-            *writer_guard = None;
-        }
         self.service_control.stop().await
     }
 
-    async fn handle_connection(
+    async fn handle(
         mut reader: DataPacketReader,
+        mut writer: DataPacketWriter,
         mut rx: oneshot::Receiver<bool>,
         server_info: &ServerInfo,
     ) -> ConnectionState {
+        // 创建定时器每30s发送心跳
+        let mut interval =
+            tokio::time::interval(tokio::time::Duration::from_secs(30));
         loop {
             select! {
                 _ = &mut rx => {
                     info!("Received shutdown signal");
                     return ConnectionState::Disconnected;
                 },
+                _ = interval.tick() => {
+                    let system = config::system::config().unwrap();
+                    let packet = DataPacket::new(system.id(), PacketData::Ping);
+                    if let Err(e) = writer.send(packet).await {
+                        let error_msg = format!("Failed to send ping: {}", e);
+                        error!("{}", error_msg);
+                        return ConnectionState::Error(error_msg);
+                    }
+                }
                 result = reader.next() => {
                     match result {
                         None => {

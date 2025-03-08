@@ -2,6 +2,8 @@
 pub const MAIN_WINDOW_LABEL: &str = "main";
 /// 图标ID
 pub const TRAY_ICON_ID: &str = "main";
+/// store id
+pub const STORE_ID: &str = "store";
 /// MDNS服务类型
 pub const MDNS_SERVICE_TYPE: &str = "_sp._udp.local.";
 /// MDNS服务端名称

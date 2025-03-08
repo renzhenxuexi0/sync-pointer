@@ -1,5 +1,5 @@
 import { systemSettingsStore, updateSystemSettings } from '@/store/settings/system';
-import { ProFormSelect, ProFormSwitch } from '@ant-design/pro-components';
+import { ProFormSelect, ProFormSwitch, ProFormText } from '@ant-design/pro-components';
 import { useTranslation } from 'react-i18next';
 import { useSnapshot } from 'valtio';
 import SettingsForm from '../components/SettingsForm';
@@ -14,6 +14,13 @@ function SystemSettings() {
         await updateSystemSettings(values);
       }}
     >
+      {/* 序列号展示 */}
+      <ProFormText
+        name="id"
+        label={t('settings.system-settings.serial-number.label')}
+        readonly
+        disabled
+      />
       <ProFormSelect
         name="locale"
         label={t('settings.system-settings.language.label')}

@@ -63,7 +63,6 @@ impl ServerListener {
                                         // Message received
                                         let mut last_activity_guard = last_activity.write();
                                         *last_activity_guard = Instant::now();
-                                        drop(last_activity_guard);
                                     }
                                     Some(Err(e)) => {
                                         // Error occurred

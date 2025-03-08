@@ -71,3 +71,7 @@ hostname = "0.4.0"
 local-ip-address = "0.6.3"
 # 线程安全map
 dashmap = { version = "6.1.0" }
+# rand
+rand = { version = "0.9", default-features = false, features = ["thread_rng"] }
+# uuid
+uuid = { version = "1", default-features = false, features = ["v4"] }

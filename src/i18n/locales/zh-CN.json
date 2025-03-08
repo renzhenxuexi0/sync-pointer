@@ -37,6 +37,9 @@
       },
       "auto-start": {
         "label": "开机启动"
+      },
+      "serial-number": {
+        "label": "序列号"
       }
     },
     "network-settings": {

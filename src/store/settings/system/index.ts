@@ -1,3 +1,4 @@
+import { generateUuid } from '@/api/util';
 import i18n from '@/i18n';
 import { setTheme } from '@tauri-apps/api/app';
 import { disable, enable, isEnabled } from '@tauri-apps/plugin-autostart';
@@ -7,6 +8,7 @@ import { State, store } from 'tauri-plugin-valtio';
 const KEY = 'system';
 
 export interface SystemSettings extends State {
+  id: string;
   theme: 'light' | 'dark' | 'auto';
   locale: 'zh-CN' | 'en-US' | 'auto';
   autoStart: boolean;
@@ -15,6 +17,7 @@ export interface SystemSettings extends State {
 const systemSettingsStore = store(
   KEY,
   {
+    id: '',
     locale: 'auto',
     theme: 'auto',
     autoStart: false,
@@ -39,6 +42,10 @@ async function detectSystemLocale(): Promise<'zh-CN' | 'en-US'> {
 
 async function initSystemSettings() {
   await systemSettingsStore.start();
+  if (systemSettingsStore.state.id === '') {
+    systemSettingsStore.state.id = await generateUuid();
+  }
+
   const sys_locale = await detectSystemLocale();
   const locale =
     systemSettingsStore.state.locale === 'auto' ? sys_locale : systemSettingsStore.state.locale;

@@ -37,6 +37,9 @@
       },
       "auto-start": {
         "label": "Start up"
+      },
+      "serial-number": {
+        "label": "Serial Number"
       }
     },
     "network-settings": {
