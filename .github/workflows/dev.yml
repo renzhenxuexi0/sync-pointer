@@ -2,9 +2,7 @@ name: Development Test
 
 on:
   push:
-    branches: [main, dev]
-  pull_request:
-    branches: [main, dev]
+    branches: [dev]
   workflow_dispatch:
 permissions: write-all
 env:
