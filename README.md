@@ -1,5 +1,7 @@
 # Sync Pointer
 
+> **⚠️ WARNING: This project is currently under development and not yet ready for use.**
+
 <div align="center">
    <img src="https://raw.githubusercontent.com/renzhenxuexi0/sync-pointer/release/public/favicon.ico" alt="Sync Pointer" width="80" />
    
@@ -11,90 +13,95 @@
       <img src="https://img.shields.io/github/contributors/renzhenxuexi0/sync-pointer" alt="Contributors" />
       <img src="https://img.shields.io/github/stars/renzhenxuexi0/sync-pointer" alt="Stars" />
    </p>
+
+   <p>
+      <a href="README.md">English</a> | 
+      <a href="README_zh.md">中文</a>
+   </p>
 </div>
 
-## 功能
+## Features
 
-- 在多台设备之间无缝切换键盘和鼠标
-- 支持多种操作系统，包括 Windows、macOS 和 Linux
-- 简单易用的用户界面
+- Seamlessly switch keyboard and mouse between multiple devices
+- Support for multiple operating systems, including Windows, macOS, and Linux
+- Simple and intuitive user interface
 
-## 技术栈
+## Tech Stack
 
-### 前端
+### Frontend
 
-- **React 19**: 用于构建高效用户界面的 JavaScript 库
-- **Vite**: 现代化的前端构建工具，提供极速的开发体验
-- **TypeScript**: 增强的 JavaScript 类型系统
-- **Ant Design 5.x**: 企业级 UI 设计语言和组件库
-- **Tailwind CSS 4.x**: 实用优先的 CSS 框架
-- **Valtio**: 轻量级状态管理库
-- **i18next**: 强大的国际化框架
-- **React Router 7**: 声明式路由解决方案
-- **DND Kit**: 现代化拖放工具库
+- **React 19**: JavaScript library for building efficient user interfaces
+- **Vite**: Modern frontend build tool that provides an extremely fast development experience
+- **TypeScript**: Enhanced JavaScript with type system
+- **Ant Design 5.x**: Enterprise-class UI design language and React components
+- **Tailwind CSS 4.x**: Utility-first CSS framework
+- **Valtio**: Lightweight state management library
+- **i18next**: Powerful internationalization framework
+- **React Router 7**: Declarative routing solution
+- **DND Kit**: Modern drag-and-drop toolkit
 
-### 后端 (Rust)
+### Backend (Rust)
 
-- **Tauri 2.x**: 构建小巧、快速、安全的跨平台桌面应用框架
-- **Tokio**: 异步运行时和网络框架
-- **Serde**: 高效的序列化/反序列化库
-- **rkyv**: 零拷贝反序列化框架
-- **mdns-sd**: 服务发现库，用于局域网设备发现
-- **spdlog-rs**: 高性能日志库
-- **rust-i18n**: 国际化支持
+- **Tauri 2.x**: Framework for building small, fast, and secure desktop applications
+- **Tokio**: Asynchronous runtime and networking framework
+- **Serde**: Efficient serialization/deserialization library
+- **rkyv**: Zero-copy deserialization framework
+- **mdns-sd**: Service discovery library for local network device discovery
+- **spdlog-rs**: High-performance logging library
+- **rust-i18n**: Internationalization support
 
-### 插件
+### Plugins
 
-- **tauri-plugin-single-instance**: 确保应用只有一个实例运行
-- **tauri-plugin-valtio**: 状态管理与持久化
-- **tauri-plugin-autostart**: 系统启动时自动运行应用
-- **tauri-plugin-window-state**: 保存和恢复窗口位置及大小
-- **tauri-plugin-fs/os/dialog/opener/process**: 系统交互功能集成
+- **tauri-plugin-single-instance**: Ensures only one instance of the app is running
+- **tauri-plugin-valtio**: State management and persistence
+- **tauri-plugin-autostart**: Auto-launch app on system startup
+- **tauri-plugin-window-state**: Save and restore window position and size
+- **tauri-plugin-fs/os/dialog/opener/process**: System interaction functionality
 
-## 推荐开发环境
+## Recommended Development Environment
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri 插件](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- [VS Code](https://code.visualstudio.com/) + [Tauri Extension](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
-## 安装与使用
+## Installation and Usage
 
-1. 克隆仓库：
+1. Clone the repository:
 
    ```bash
    git clone https://github.com/renzhenxuexi0/sync-pointer.git
    cd sync-pointer
    ```
 
-2. 安装依赖：
+2. Install dependencies:
 
    ```bash
    bun i
    ```
 
-3. 运行开发服务器：
+3. Run development server:
 
    ```bash
    bun run dev
    ```
 
-4. 构建桌面应用：
+4. Build the desktop app:
    ```bash
    bun run tauri build
    ```
 
-## 日志路径
+## Log Paths
 
-| 操作系统 | 路径                                         |
-| -------- | -------------------------------------------- |
-| Linux    | `${configDir}/${bundleIdentifier}/logs`      |
-| macOS    | `${homeDir}/Library/Logs/{bundleIdentifier}` |
-| Windows  | `${configDir}/${bundleIdentifier}/logs`      |
+| OS      | Path                                         |
+| ------- | -------------------------------------------- |
+| Linux   | `${configDir}/${bundleIdentifier}/logs`      |
+| macOS   | `${homeDir}/Library/Logs/{bundleIdentifier}` |
+| Windows | `${configDir}/${bundleIdentifier}/logs`      |
 
-## 贡献
+## Contribution
 
-欢迎贡献代码！请提交 Pull Request 或报告问题。
+Contributions are welcome! Please submit a Pull Request or report issues.
 
-## 使用协议
+## License
 
-本仓库遵循 AGPL-3.0 开源协议。
+This repository is licensed under AGPL-3.0.
 
-允许个人使用，如果需要商业使用，请联系作者。除非获得商业授权，否则无论以何种方式修改或者使用代码，都需要开源，并保留相关版权信息。详细内容请参见 AGPL-3.0 开源协议。
+Personal use is permitted. For commercial use, please contact the author. Unless commercially licensed, any modifications or usage of the code requires open-sourcing and maintaining copyright notices. See the AGPL-3.0 license for details.

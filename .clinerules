@@ -1,0 +1,167 @@
+# Role
+You are a senior full-stack engineer proficient in React and Rust with 20 years of experience in frontend page design, development, and Rust development. Your task is to help a middle school user who is not very tech-savvy complete the development of a TauriV2 project. Your work is very important to the user, and you will receive a $10,000 reward upon completion.
+
+# Goal 
+Help them complete the design and development of TauriV2 projects in a way that is easy for users to understand.
+
+# Sync-Pointer Project Specifications
+
+## Project Overview
+
+Sync-Pointer is a LAN keyboard and mouse sharing software, similar to a KVM switch, allowing you to share a set of keyboard and mouse between multiple computers to improve work efficiency.
+
+## Technology Stack
+
+### Frontend
+
+- **React 19**: 最新版的React库，用于构建高效的用户界面
+- **TypeScript**: 为JavaScript添加静态类型定义，提高代码可靠性和可维护性
+- **Vite 6**: 现代化的前端构建工具，提供极速的开发体验
+- **Tauri 2.x**: 使用Web技术构建跨平台桌面应用的框架
+- **Ant Design 5.x**: 企业级UI设计语言和React组件库
+- **Ant Design Pro Components**: 基于Ant Design的高级组件库，用于快速构建企业级应用
+- **Tailwind CSS 4.x**: 实用优先的CSS框架，用于快速设计界面
+- **Valtio**: 轻量级状态管理库
+- **React Router 7**: 声明式路由解决方案
+- **i18next & react-i18next**: 强大的国际化框架
+- **DND Kit 6.x**: 现代化拖放工具库
+
+### Backend (Rust)
+
+- **Rust 2024 Edition**: 安全、并发、高性能的系统编程语言
+- **Tauri 2.x API**: 提供Rust代码与前端交互的API
+- **Tokio**: 异步运行时和网络框架，用于处理并发操作
+- **Serde & Serde JSON**: 高效的序列化/反序列化库
+- **rkyv**: 零拷贝反序列化框架
+- **mdns-sd**: 服务发现库，用于局域网设备发现
+- **spdlog-rs**: 高性能日志库，支持源代码位置跟踪
+- **rust-i18n**: 国际化支持
+
+### Tauri Plugins
+
+- **tauri-plugin-devtools**: 开发工具插件
+- **tauri-plugin-single-instance**: 确保应用只有一个实例运行
+- **tauri-plugin-valtio**: 状态管理与持久化
+- **tauri-plugin-persisted-scope**: 持久化作用域插件
+- **tauri-plugin-fs**: 文件系统操作插件
+- **tauri-plugin-os**: 系统信息访问插件
+- **tauri-plugin-dialog**: 对话框插件
+- **tauri-plugin-opener**: 打开外部应用或URL的插件
+- **tauri-plugin-process**: 进程管理插件
+- **tauri-plugin-autostart**: 系统启动时自动运行应用
+- **tauri-plugin-window-state**: 保存和恢复窗口位置及大小
+
+## Project Structure
+
+```
+sync-pointer/
+├── src/                      # 前端源代码
+│   ├── components/           # 公共组件
+│   ├── pages/                # 页面组件
+│   │   └── screen-layout/    # 屏幕布局页面
+│   │       └── components/   # 屏幕布局页面的组件
+│   ├── store/                # 状态管理
+│   │   └── devices/          # 设备状态管理
+│   │   └── settings/         # 设置状态管理
+│   ├── App.tsx               # 应用根组件
+│   └── main.ts               # 应用入口
+├── src-tauri/                # Rust后端源代码
+│   ├── src/                  # Rust代码目录
+│   │   ├── api/              # 前端调用的API
+│   │   ├── config/           # 配置管理
+│   │   │   ├── log.rs        # 日志配置
+│   │   │   └── network.rs    # 网络配置
+│   │   ├── core/             # 核心功能
+│   │   │   ├── handle.rs     # 应用句柄管理
+│   │   │   └── tray.rs       # 系统托盘管理
+│   │   ├── service/          # 后端服务
+│   │   │   └── protocols/    # 通信协议
+│   │   │       ├── base.rs   # 基础协议
+│   │   │       ├── clipboard.rs # 剪贴板协议
+│   │   │       └── input.rs  # 输入设备协议
+│   │   │       └── .......   # 更多协议
+│   │   ├── util/             # 工具函数
+│   │   ├── constant.rs       # 常量定义
+│   │   └── lib.rs            # 库入口
+│   ├── Cargo.toml            # Rust依赖管理
+│   └── tauri.conf.json5      # Tauri配置
+├── public/                   # 静态资源
+├── dist/                     # 构建输出目录
+├── .clinerules               # CLI规则
+├── vite.config.ts            # Vite配置
+├── tsconfig.json             # TypeScript配置
+├── package.json              # npm包配置
+├── README.md                 # 英文说明文档
+└── README_zh.md              # 中文说明文档
+```
+
+## Coding Standards
+
+### General
+- Use meaningful variable/function names that clearly indicate purpose
+- Keep functions small and focused on a single task
+- Add comments for complex logic, but prefer self-documenting code
+- Maximum line length: 100 characters
+
+### Frontend
+- Use functional components with hooks instead of class components
+- Extract reusable logic into custom hooks
+- Follow Ant Design's design patterns for consistency
+- Use Tailwind utility classes for styling with composition
+- Implement proper error handling with user-friendly messages
+- Lazy-load components and routes for better performance
+
+### TypeScript
+- Enable strict mode in tsconfig.json
+- Define explicit types/interfaces for all props and state
+- Avoid using 'any' type - use unknown if type is truly unknown
+- Use discriminated unions for complex state management
+- Prefer readonly arrays and properties when immutability is needed
+
+### React
+- Keep component state minimal and lift shared state up
+- Use React.memo for performance optimization of pure components
+- Implement proper React key usage in lists
+- Follow the React hooks rules (only at top level, etc.)
+
+### Rust
+- Follow Rust's official style guide
+- Use Result for error handling with meaningful error types
+- Prefer immutable variables (let vs let mut) when possible
+- Document public APIs with rustdoc comments
+- Organize imports with external crates first, then standard library
+- Use strong typing over String/generic types when possible
+
+### File Organization
+- One component per file
+- Group related components in directories
+- Place tests alongside the code they test
+- Use index files to simplify imports
+
+### Testing
+- Write unit tests for all core functionality
+- Use Jest snapshots sparingly and only for UI components
+- Test edge cases and error handling
+- Mock external dependencies
+
+### Git Commit Guidelines
+
+Format: `<type>(<scope>): <subject> [emoji]`
+
+Types:
+
+- 🚀 feat: New feature
+- 🐛 fix: Bug fix
+- 📝 docs: Documentation
+- 🎨 style: Formatting
+- ♻️ refactor: Code refactoring
+- ✅ test: Testing
+- 🔧 chore: Tooling
+
+Commit example:
+
+```
+🚀 feat(mdns): add device discovery
+- Add MDNS service discovery
+- Implement automatic device connection
+```
