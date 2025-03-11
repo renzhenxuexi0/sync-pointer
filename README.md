@@ -15,6 +15,7 @@ This template should help get you started developing with Tauri, React and Types
 - 简单易用的用户界面。
 
 ## 日志路径
+
 日志文件位置因操作系统而异：
 
 - Linux: `${configDir}/${bundleIdentifier}/logs`
@@ -24,30 +25,35 @@ This template should help get you started developing with Tauri, React and Types
 ## 安装与使用
 
 1. 克隆仓库：
-    ```bash
-    git clone https://github.com/your-repo/sync-pointer.git
-    cd sync-pointer
-    ```
+
+   ```bash
+   git clone https://github.com/your-repo/sync-pointer.git
+   cd sync-pointer
+   ```
 
 2. 安装依赖：
-    ```bash
-    bun i
-    ```
+
+   ```bash
+   bun i
+   ```
 
 3. 运行开发服务器：
-    ```bash
-    bun run dev
-    ```
+
+   ```bash
+   bun run dev
+   ```
 
 4. 构建桌面应用：
-    ```bash
-    bun run tauri build
-    ```
+   ```bash
+   bun run tauri build
+   ```
 
 ## 贡献
 
 欢迎贡献代码！请提交 Pull Request 或报告问题。
 
-## 许可证
+## 使用协议
 
-该项目使用 MIT 许可证。
+本仓库遵循 AGPL-3.0 开源协议。
+
+允许个人使用，如果需要商业使用，请联系作者。除非获得商业授权，否则无论以何种方式修改或者使用代码，都需要开源，并保留相关版权信息。详细内容请参见 AGPL-3.0 开源协议。
