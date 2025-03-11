@@ -52,18 +52,23 @@ jobs:
           # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
           cache-all-crates: true
           cache-on-failure: true
+          prefix-key: 'sync-pointer'
+          env-vars: 'CARGO CC CFLAGS CXX CMAKE RUST'
+          save-if: true
+          cache-targets: true
+          cache-bin: true
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -76,6 +81,7 @@ jobs:
           bun run lint
 
       - name: Run Clippy
+        working-directory: ./src-tauri
         run: |
           cargo clippy --all-targets --all-features
 
