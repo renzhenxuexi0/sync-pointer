@@ -7,7 +7,11 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import eslintPluginReadableTailwind from 'eslint-plugin-readable-tailwind';
 import globals from 'globals';
+import os from 'os';
 import tseslint from 'typescript-eslint';
+
+// 根据操作系统自动检测换行符类型
+const lineBreakStyle = os.EOL === '\r\n' ? 'windows' : 'unix';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -53,7 +57,7 @@ export default [
       // or configure rules individually
       'readable-tailwind/multiline': [
         'error',
-        { group: 'newLine', classesPerLine: 1, lineBreakStyle: 'windows' },
+        { group: 'newLine', classesPerLine: 1, lineBreakStyle: lineBreakStyle },
       ],
     },
   },
