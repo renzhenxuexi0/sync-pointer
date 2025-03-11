@@ -24,17 +24,17 @@ jobs:
           - platform: windows-latest
             target: x86_64-pc-windows-msvc
             bundle: nsis
-            args: '--debug --target x86_64-pc-windows-msvc'
+            args: '--target x86_64-pc-windows-msvc'
           # - platform: macos-latest
           #   target: aarch64-apple-darwin
           #   bundle: dmg
-          #   args: '--debug --target aarch64-apple-darwin'
+          #   args: '--target aarch64-apple-darwin'
           # - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
           #   args: '--debug'
           # - platform: macos-latest
           #   target: x86_64-apple-darwin
           #   bundle: dmg
-          #   args: '--debug --target x86_64-apple-darwin'
+          #   args: '--target x86_64-apple-darwin'
 
     runs-on: ${{ matrix.platform }}
     steps:
