@@ -9,7 +9,7 @@ export interface GirdCell {
   disabled: boolean;
 }
 
-function gridCell(cell: GirdCell, device?: Device) {
+function GridCell(cell: GirdCell, device?: Device) {
   const id = `${cell.row}-${cell.col}`;
   const { setNodeRef } = useDroppable({
     id,
@@ -59,7 +59,7 @@ function DeviceGrid() {
         const row = Math.floor(index / 5);
         const col = index % 5;
         const device = state.devices[createPositionKey(row, col)];
-        return gridCell(
+        return GridCell(
           {
             row,
             col,

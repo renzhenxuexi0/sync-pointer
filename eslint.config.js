@@ -7,30 +7,32 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import eslintPluginReadableTailwind from 'eslint-plugin-readable-tailwind';
 import globals from 'globals';
+import os from 'os';
 import tseslint from 'typescript-eslint';
+
+// 根据操作系统自动检测换行符类型
+const lineBreakStyle = os.EOL === '\r\n' ? 'windows' : 'unix';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
-  { files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
+  {
+    files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
+    ...pluginReact.configs.flat.recommended,
+    ...pluginReact.configs.flat['jsx-runtime'],
+    languageOptions: {
+      ...pluginReact.configs.flat.recommended.languageOptions,
+      globals: {
+        ...globals.serviceworker,
+        ...globals.browser,
+      },
+    },
+    settings: { react: { version: '19.0.0' } },
+    ...reactHooks.configs['recommended-latest'],
+  },
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
   reactRefresh.configs.vite,
-  {
-    files: ['**/*.{js,jsx}'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        ecmaFeatures: { jsx: true },
-        sourceType: 'module',
-      },
-    },
-    settings: { react: { version: '18.3.1s' } },
-    ...reactHooks.configs['recommended-latest'],
-  },
   {
     files: ['**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
@@ -40,15 +42,9 @@ export default [
       },
     },
   },
+  reactCompiler.configs.recommended,
+  pluginPrettierRecommended,
   {
-    files: ['**/*.{jsx,tsx}'],
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
     plugins: {
       'readable-tailwind': eslintPluginReadableTailwind,
     },
@@ -61,12 +57,10 @@ export default [
       // or configure rules individually
       'readable-tailwind/multiline': [
         'error',
-        { group: 'newLine', classesPerLine: 1, lineBreakStyle: 'windows' },
+        { group: 'newLine', classesPerLine: 1, lineBreakStyle: lineBreakStyle },
       ],
     },
   },
-  reactCompiler.configs.recommended,
-  pluginPrettierRecommended,
   {
     rules: {
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
