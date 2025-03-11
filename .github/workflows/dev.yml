@@ -59,10 +59,10 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Bun install and check
+      - name: Bun install and lint
         run: |
           bun install
-          bun check ${{ matrix.target }}
+          bun run lint
 
       - name: Tauri build
         uses: tauri-apps/tauri-action@v0
