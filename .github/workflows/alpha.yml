@@ -1,21 +1,23 @@
-name: Release Build
+name: Alpha Build
 
 on:
   push:
     branches:
-      - release
+      - alpha
   workflow_dispatch:
+
 permissions: write-all
+
 env:
   CARGO_INCREMENTAL: 0
   RUST_BACKTRACE: short
+
 concurrency:
-  # only allow per workflow per commit (and not pr) to run at a time
   group: '${{ github.workflow }} - ${{ github.head_ref || github.ref }}'
   cancel-in-progress: ${{ github.ref != 'refs/heads/release' }}
 
 jobs:
-  release:
+  alpha:
     strategy:
       fail-fast: false
       matrix:
@@ -92,9 +94,33 @@ jobs:
           # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
-          tagName: v__VERSION__
-          releaseName: 'Sync Pointer v__VERSION__'
-          releaseBody: '共享键鼠软件，让您在多台电脑间共享一套键盘和鼠标。'
-          releaseDraft: true
-          prerelease: false
+          tagName: alpha
+          releaseName: 'Sync Pointer Alpha'
+          releaseBody: 'More new features are now supported.'
+          releaseDraft: false
+          prerelease: true
           args: ${{ matrix.args }}
+
+      - name: Upload Artifacts
+        if: matrix.platform == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+
+      - name: Upload Artifacts
+        if: matrix.platform == 'ubuntu-22.04'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: src-tauri/target/${{ matrix.target }}/release/bundle/appimage/*.AppImage
+          if-no-files-found: error
+
+      - name: Upload Artifacts
+        if: matrix.platform == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*.exe
+          if-no-files-found: error

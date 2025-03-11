@@ -1,6 +1,10 @@
 name: Development Test
 
 on:
+  push:
+    branches:
+      - dev
+      - dev_*
   workflow_dispatch:
 permissions: write-all
 env:
@@ -9,7 +13,7 @@ env:
 concurrency:
   # only allow per workflow per commit (and not pr) to run at a time
   group: '${{ github.workflow }} - ${{ github.head_ref || github.ref }}'
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/release' }}
 
 jobs:
   dev:
@@ -70,6 +74,10 @@ jobs:
           bun install
           bun run lint
 
+      - name: Run Clippy
+        run: |
+          cargo clippy --all-targets --all-features
+
       - name: Tauri build
         uses: tauri-apps/tauri-action@v0
         env:
@@ -84,11 +92,8 @@ jobs:
           # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
-          tagName: Sync Pointer v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-          releaseName: 'App v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
-          releaseDraft: true
-          prerelease: false
+          includeRelease: false
+          includeDebug: true
           args: ${{ matrix.args }}
 
       # - name: Upload Artifacts
