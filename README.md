@@ -1,33 +1,66 @@
-# Tauri + React + Typescript
+# Sync Pointer
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
-
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
-- **Next.js**: 一个用于构建现代 Web 应用的 React 框架。
-- **Tauri**: 一个用于构建小巧、快速、安全的桌面应用的框架。
+<div align="center">
+   <img src="https://raw.githubusercontent.com/renzhenxuexi0/sync-pointer/release/public/favicon.ico" alt="Sync Pointer" width="80" />
+   
+   <p>
+      <img src="https://img.shields.io/github/license/renzhenxuexi0/sync-pointer" alt="License" />
+      <img src="https://img.shields.io/github/last-commit/renzhenxuexi0/sync-pointer" alt="Last Commit" />
+      <img src="https://img.shields.io/github/issues/renzhenxuexi0/sync-pointer" alt="Issues" />
+      <img src="https://img.shields.io/github/issues-pr/renzhenxuexi0/sync-pointer" alt="Pull Requests" />
+      <img src="https://img.shields.io/github/contributors/renzhenxuexi0/sync-pointer" alt="Contributors" />
+      <img src="https://img.shields.io/github/stars/renzhenxuexi0/sync-pointer" alt="Stars" />
+   </p>
+</div>
 
 ## 功能
 
-- 在多台设备之间无缝切换键盘和鼠标。
-- 支持多种操作系统，包括 Windows、macOS 和 Linux。
-- 简单易用的用户界面。
+- 在多台设备之间无缝切换键盘和鼠标
+- 支持多种操作系统，包括 Windows、macOS 和 Linux
+- 简单易用的用户界面
 
-## 日志路径
+## 技术栈
 
-日志文件位置因操作系统而异：
+### 前端
 
-- Linux: `${configDir}/${bundleIdentifier}/logs`
-- macOS: `${homeDir}/Library/Logs/{bundleIdentifier}`
-- Windows: `${configDir}/${bundleIdentifier}/logs`
+- **React 19**: 用于构建高效用户界面的 JavaScript 库
+- **Vite**: 现代化的前端构建工具，提供极速的开发体验
+- **TypeScript**: 增强的 JavaScript 类型系统
+- **Ant Design 5.x**: 企业级 UI 设计语言和组件库
+- **Tailwind CSS 4.x**: 实用优先的 CSS 框架
+- **Valtio**: 轻量级状态管理库
+- **i18next**: 强大的国际化框架
+- **React Router 7**: 声明式路由解决方案
+- **DND Kit**: 现代化拖放工具库
+
+### 后端 (Rust)
+
+- **Tauri 2.x**: 构建小巧、快速、安全的跨平台桌面应用框架
+- **Tokio**: 异步运行时和网络框架
+- **Serde**: 高效的序列化/反序列化库
+- **rkyv**: 零拷贝反序列化框架
+- **mdns-sd**: 服务发现库，用于局域网设备发现
+- **spdlog-rs**: 高性能日志库
+- **rust-i18n**: 国际化支持
+
+### 插件
+
+- **tauri-plugin-single-instance**: 确保应用只有一个实例运行
+- **tauri-plugin-valtio**: 状态管理与持久化
+- **tauri-plugin-autostart**: 系统启动时自动运行应用
+- **tauri-plugin-window-state**: 保存和恢复窗口位置及大小
+- **tauri-plugin-fs/os/dialog/opener/process**: 系统交互功能集成
+
+## 推荐开发环境
+
+- [VS Code](https://code.visualstudio.com/) + [Tauri 插件](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
 ## 安装与使用
 
 1. 克隆仓库：
 
    ```bash
-   git clone https://github.com/your-repo/sync-pointer.git
+   git clone https://github.com/renzhenxuexi0/sync-pointer.git
    cd sync-pointer
    ```
 
@@ -47,6 +80,14 @@ This template should help get you started developing with Tauri, React and Types
    ```bash
    bun run tauri build
    ```
+
+## 日志路径
+
+| 操作系统 | 路径                                         |
+| -------- | -------------------------------------------- |
+| Linux    | `${configDir}/${bundleIdentifier}/logs`      |
+| macOS    | `${homeDir}/Library/Logs/{bundleIdentifier}` |
+| Windows  | `${configDir}/${bundleIdentifier}/logs`      |
 
 ## 贡献
 
