@@ -5,7 +5,7 @@ use std::sync::OnceLock;
 use tokio::{select, sync::oneshot, task::JoinHandle};
 
 use crate::{
-    constant,
+    config, constant,
     service::{ServiceControl, client},
 };
 
@@ -31,11 +31,6 @@ impl MdnsClient {
         let mdns_start_logic =
             |mut rx: oneshot::Receiver<bool>| -> Result<JoinHandle<()>> {
                 let daemon = ServiceDaemon::new()?;
-                #[cfg(target_os = "windows")]
-                {
-                    daemon.set_multicast_loop_v4(false)?;
-                    daemon.set_multicast_loop_v6(false)?;
-                }
                 let receiver = daemon
                     .browse(constant::MDNS_SERVICE_TYPE)
                     .map_err(|e| anyhow::anyhow!("Failed to browse: {}", e))?;
@@ -46,6 +41,8 @@ impl MdnsClient {
                     let mut interval = tokio::time::interval(
                         tokio::time::Duration::from_secs(1),
                     );
+                    let my_device_id =
+                        config::system::config().unwrap_or_default().id();
 
                     loop {
                         select! {
@@ -59,7 +56,7 @@ impl MdnsClient {
                             _ = interval.tick() => {
                                 let elapsed = now.elapsed();
                                 if let Ok(event) = receiver.try_recv() {
-                                    Self::handle_mdns_event(elapsed, event).await;
+                                    Self::handle_mdns_event(elapsed, event, &my_device_id).await;
                                 }
                             }
                         }
@@ -83,11 +80,12 @@ impl MdnsClient {
     async fn handle_mdns_event(
         elapsed: std::time::Duration,
         event: ServiceEvent,
+        my_device_id: &str,
     ) {
         match event {
             ServiceEvent::ServiceResolved(info) => {
                 if let Some(device_info) =
-                    Self::resolve_device_info(elapsed, info).await
+                    Self::resolve_device_info(elapsed, info, my_device_id).await
                 {
                     // 尝试启动 TCP 连接，不再直接停止 MDNS
                     // TCP 连接成功后会通知 ClientManager，由 ClientManager 决定是否停止 MDNS
@@ -116,6 +114,7 @@ impl MdnsClient {
     async fn resolve_device_info(
         elapsed: std::time::Duration,
         info: mdns_sd::ServiceInfo,
+        my_device_id: &str,
     ) -> Option<ServerInfo> {
         let fullname = info.get_fullname().to_string();
         let hostname = info.get_hostname().to_string();
@@ -138,12 +137,17 @@ impl MdnsClient {
 
         let ip = addresses.iter().next().map(|ip| ip.to_string())?;
         let tcp_port =
-            Self::get_port(properties, "tcp_port", elapsed, &fullname)?;
+            Self::get_u16(properties, "tcp_port", elapsed, &fullname)?;
+        let device_id = Self::get_string(properties, "device_id")?;
+        if device_id == my_device_id {
+            info!("At {:?}: Skipping own device {}", elapsed, device_id);
+            return None;
+        }
 
-        Some(ServerInfo { hostname, ip, tcp_port })
+        Some(ServerInfo { device_id, hostname, ip, tcp_port })
     }
 
-    fn get_port(
+    fn get_u16(
         properties: &mdns_sd::TxtProperties,
         key: &str,
         elapsed: std::time::Duration,
@@ -159,5 +163,12 @@ impl MdnsClient {
                 );
                 None
             })
+    }
+
+    fn get_string(
+        properties: &mdns_sd::TxtProperties,
+        key: &str,
+    ) -> Option<String> {
+        properties.get(key).map(|val| val.val_str().to_string())
     }
 }

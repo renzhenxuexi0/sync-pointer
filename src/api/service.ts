@@ -24,14 +24,9 @@ export interface UpdateServerInfoOptions {
 }
 
 /**
- * 更新服务器配置信息
- * @param options 服务器配置选项
+ * 重启服务（基于当前服务类型）
  * @returns Promise<void>
  */
-export async function updateServerInfo(options: UpdateServerInfoOptions = {}): Promise<void> {
-  return invoke('update_server_info', {
-    host: options.host,
-    mdns_port: options.mdnsPort,
-    tcp_port: options.tcpPort,
-  });
+export async function restartService(serviceType: 'client' | 'server'): Promise<void> {
+  return invoke('restart_service', { serviceType });
 }

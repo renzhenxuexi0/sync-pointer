@@ -59,10 +59,11 @@ impl ServerListener {
                                         info!("Connection closed");
                                         break;
                                     }
-                                    Some(Ok(_data)) => {
+                                    Some(Ok(data)) => {
                                         // Message received
                                         let mut last_activity_guard = last_activity.write();
                                         *last_activity_guard = Instant::now();
+                                        info!("Received data: {:?}", data.ts);
                                     }
                                     Some(Err(e)) => {
                                         // Error occurred

@@ -26,6 +26,10 @@ pub fn run() {
         // 设置应用数据目录
         let app_data_dir = app.path().app_data_dir()?;
         app.handle().valtio().set_path(app_data_dir.join("store"))?;
+        
+        // 设置网络配置监听
+        config::network::setup_config_watcher(app.handle())?;
+        
         Ok(())
     });
 
@@ -63,7 +67,7 @@ pub fn run() {
             // service
             api::service::start_service,
             api::service::handle_service_type_change,
-            api::service::update_server_info,
+            api::service::restart_service,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

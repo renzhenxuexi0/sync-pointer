@@ -1,17 +1,15 @@
 use anyhow::Result;
-use parking_lot::RwLock;
-use std::sync::{Arc, OnceLock};
-use tauri_plugin_os::hostname;
+use std::sync::OnceLock;
 use tokio::{sync::oneshot, task::JoinHandle};
 
-use crate::{constant, service::ServiceControl};
+use crate::{
+    config::{self},
+    service::ServiceControl,
+};
 
 #[derive(Debug)]
 pub struct MdnsServer {
     service_control: ServiceControl,
-    host: Arc<RwLock<String>>,
-    mdns_port: Arc<RwLock<u16>>,
-    tcp_port: Arc<RwLock<u16>>,
 }
 
 impl MdnsServer {
@@ -19,74 +17,29 @@ impl MdnsServer {
         static MDNS: OnceLock<MdnsServer> = OnceLock::new();
         MDNS.get_or_init(|| MdnsServer {
             service_control: ServiceControl::new("Mdns Server".to_string()),
-            host: Arc::new(RwLock::new(hostname())),
-            mdns_port: Arc::new(RwLock::new(constant::DEFAULT_MDNS_PORT)),
-            tcp_port: Arc::new(RwLock::new(constant::DEFAULT_TCP_PORT)),
         })
-    }
-
-    pub fn host(&self) -> String {
-        self.host.read().clone()
-    }
-    pub fn mdns_port(&self) -> u16 {
-        *self.mdns_port.read()
-    }
-    pub fn tcp_port(&self) -> u16 {
-        *self.tcp_port.read()
-    }
-
-    pub async fn update_server_info(
-        &self,
-        host: Option<String>,
-        mdns_port: Option<u16>,
-        tcp_port: Option<u16>,
-    ) -> Result<()> {
-        if let Some(host) = host {
-            let mut host_guard = self.host.write();
-            *host_guard = host;
-            drop(host_guard); // Release lock before restarting
-        }
-
-        if let Some(mdns_port) = mdns_port {
-            let mut mdns_port_guard = self.mdns_port.write();
-            *mdns_port_guard = mdns_port;
-            drop(mdns_port_guard);
-        }
-
-        if let Some(tcp_port) = tcp_port {
-            let mut tcp_port_guard = self.tcp_port.write();
-            *tcp_port_guard = tcp_port;
-            drop(tcp_port_guard);
-        }
-
-        if self.is_running() {
-            let mdns = MdnsServer::instance();
-            mdns.stop().await?;
-            mdns.start().await?;
-        }
-        Ok(())
     }
 
     pub async fn start(&self) -> Result<()> {
         // Clone the values we need from self to avoid capturing self in the closure
-        let host_name = self.host() + ".local.";
-        let tcp_port = self.tcp_port();
-        let mdns_port = self.mdns_port();
+        let network = config::network::get_config();
+        let system = config::system::config().unwrap_or_default();
+        let hostname = network.hostname() + ".local.";
+        let tcp_port = network.tcp_port();
+        let mdns_port = network.mdns_port();
+        let device_id = system.id();
 
         let mdns_start_logic =
             move |rx: oneshot::Receiver<bool>| -> Result<JoinHandle<()>> {
                 let daemon = mdns_sd::ServiceDaemon::new()?;
-                #[cfg(not(target_os = "windows"))]
-                {
-                    daemon.set_multicast_loop_v4(false)?;
-                    daemon.set_multicast_loop_v6(false)?;
-                }
                 let mut properties = std::collections::HashMap::new();
+
                 properties.insert("tcp_port".to_string(), tcp_port.to_string());
+                properties.insert("device_id".to_string(), device_id);
                 let service_info = mdns_sd::ServiceInfo::new(
                     crate::constant::MDNS_SERVICE_TYPE,
                     crate::constant::MDNS_SERVER_NAME,
-                    &host_name,
+                    &hostname,
                     local_ip_address::local_ip()?,
                     mdns_port,
                     properties,

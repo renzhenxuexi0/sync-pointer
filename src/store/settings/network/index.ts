@@ -1,4 +1,4 @@
-import { handleServiceTypeChange, startService, updateServerInfo } from '@/api/service';
+import { handleServiceTypeChange, restartService, startService } from '@/api/service';
 import { localIp } from '@/api/sys';
 import { hostname } from '@tauri-apps/plugin-os';
 import { State, store } from 'tauri-plugin-valtio';
@@ -43,12 +43,6 @@ async function initNetworkSettings() {
   }
 
   networkSettingsStore.state.ip = ip || networkSettingsStore.state.ip || '';
-
-  await updateServerInfo({
-    host: networkSettingsStore.state.hostname,
-    mdnsPort: networkSettingsStore.state.mdnsPort,
-    tcpPort: networkSettingsStore.state.tcpPort,
-  });
   // 启动服务
   await startService(networkSettingsStore.state.serviceType);
 }
@@ -77,20 +71,14 @@ async function updateNetworkSettings(networkSettings: Partial<NetworkSettings>) 
     isNeedUpdate = true;
   }
 
-  if (isNeedUpdate) {
-    updateServerInfo({
-      host: networkSettingsStore.state.hostname,
-      mdnsPort: networkSettingsStore.state.mdnsPort,
-      tcpPort: networkSettingsStore.state.tcpPort,
-    });
-  }
-
   if (
     networkSettings.serviceType &&
     networkSettings.serviceType !== networkSettingsStore.state.serviceType
   ) {
     networkSettingsStore.state.serviceType = networkSettings.serviceType;
     await handleServiceTypeChange(networkSettingsStore.state.serviceType);
+  } else if (isNeedUpdate) {
+    await restartService(networkSettingsStore.state.serviceType);
   }
 }
 
